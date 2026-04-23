@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Avatar from "./Avatar";
 import BriefingSheet from "./BriefingSheet";
 import MeetingCalendar from "./MeetingCalendar";
@@ -32,7 +32,15 @@ export default function PersonDetail({
   const [briefingOpen, setBriefingOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [bannerH, setBannerH] = useState<number | null>(null);
+  const bannerRef = useRef<HTMLDivElement>(null);
   const sample = isSample(person.id);
+
+  useEffect(() => {
+    if (sample && bannerRef.current && bannerH === null) {
+      setBannerH(bannerRef.current.scrollHeight);
+    }
+  }, [sample, bannerH]);
 
   const loadHistory = useCallback(async () => {
     try {
@@ -247,18 +255,20 @@ export default function PersonDetail({
 
         {sample && (
           <div
-            className={`grid transition-all duration-300 ease-out ${
-              scrolled
-                ? "grid-rows-[0fr] opacity-0"
-                : "mt-3 grid-rows-[1fr] opacity-100"
-            }`}
+            className="overflow-hidden transition-[max-height,opacity,margin] duration-300 ease-out"
+            style={{
+              maxHeight: scrolled ? 0 : bannerH ?? undefined,
+              opacity: scrolled ? 0 : 1,
+              marginTop: scrolled ? 0 : 12,
+            }}
             aria-hidden={scrolled}
           >
-            <div className="overflow-hidden">
-              <div className="mx-5 rounded-lg border border-gold/25 bg-gold/8 px-3.5 py-2.5 text-[13px] leading-relaxed text-paper/80">
-                <span className="font-semibold text-gold">예시</span> — 실제
-                데이터가 아닙니다. 이런 식으로 정리된다는 샘플이에요.
-              </div>
+            <div
+              ref={bannerRef}
+              className="mx-5 rounded-lg border border-gold/25 bg-gold/8 px-3.5 py-2.5 text-[13px] leading-relaxed text-paper/80"
+            >
+              <span className="font-semibold text-gold">예시</span> — 실제
+              데이터가 아닙니다. 이런 식으로 정리된다는 샘플이에요.
             </div>
           </div>
         )}
@@ -268,7 +278,7 @@ export default function PersonDetail({
             const top = (e.currentTarget as HTMLDivElement).scrollTop;
             setScrolled(top > 16);
           }}
-          className="overflow-y-auto px-5 pb-6 pt-1 scrollbar-none"
+          className="min-h-0 flex-1 overflow-y-auto px-5 pb-6 pt-1 scrollbar-none"
         >
           <Section title="프로필">
             <KV label="직함" value={person.title} />
