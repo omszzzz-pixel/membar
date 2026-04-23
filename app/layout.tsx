@@ -34,7 +34,7 @@ export const viewport: Viewport = {
   ],
 };
 
-const themeInitScript = `(function(){try{var t=localStorage.getItem('membar_theme')||localStorage.getItem('inmaek_theme');if(!t){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';}document.documentElement.setAttribute('data-theme',t);}catch(e){}})();`;
+const themeInitScript = `(function(){try{var t=localStorage.getItem('membar_theme')||localStorage.getItem('inmaek_theme')||'light';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();`;
 
 const swRegisterScript = `if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}`;
 
