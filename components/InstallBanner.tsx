@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 import InstallGuide from "./InstallGuide";
 import { useInstall } from "@/lib/installContext";
 
-const SNOOZE_KEY = "membar_install_banner_snooze";
-const MIN_VISITS = 3;
-const SNOOZE_DAYS = 10;
+const SNOOZE_KEY = "membar_install_banner_snooze_v2";
+const MIN_VISITS = 1;
+const SNOOZE_DAYS = 7;
 
 export default function InstallBanner() {
   const { canInstall, isInstalled, visits, install } = useInstall();
