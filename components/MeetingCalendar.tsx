@@ -10,6 +10,24 @@ type Props = {
   onRemoveMeeting?: (date: string) => void;
 };
 
+type ActivityItem =
+  | {
+      key: string;
+      kind: "meeting";
+      date: string;
+      sortKey: string;
+      place?: string | null;
+      notes?: string | null;
+    }
+  | {
+      key: string;
+      kind: "memo";
+      date: string;
+      time: string;
+      sortKey: string;
+      raw: string;
+    };
+
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
 
 function ymd(y: number, m: number, d: number): string {
@@ -47,20 +65,41 @@ export default function MeetingCalendar({
   }, [history]);
 
   const monthPrefix = `${view.y}-${String(view.m + 1).padStart(2, "0")}`;
-  const monthMeetings = useMemo(
-    () =>
-      (meetings ?? [])
-        .filter((m) => m.date?.startsWith(monthPrefix))
-        .sort((a, b) => a.date.localeCompare(b.date)),
-    [meetings, monthPrefix]
-  );
-  const monthMemoCount = useMemo(
-    () =>
-      (history ?? []).filter((h) =>
-        h.created_at?.slice(0, 10).startsWith(monthPrefix)
-      ).length,
-    [history, monthPrefix]
-  );
+
+  const monthActivity = useMemo<ActivityItem[]>(() => {
+    const items: ActivityItem[] = [];
+    for (const m of meetings ?? []) {
+      if (m.date?.startsWith(monthPrefix)) {
+        items.push({
+          key: `m-${m.date}`,
+          kind: "meeting",
+          date: m.date,
+          sortKey: `${m.date}T12:00:00`,
+          place: m.place,
+          notes: m.notes,
+        });
+      }
+    }
+    for (const h of history ?? []) {
+      const ds = h.created_at?.slice(0, 10);
+      if (ds?.startsWith(monthPrefix)) {
+        items.push({
+          key: `h-${h.id}`,
+          kind: "memo",
+          date: ds,
+          time: h.created_at.slice(11, 16),
+          sortKey: h.created_at,
+          raw: h.raw_input,
+        });
+      }
+    }
+    return items.sort((a, b) => b.sortKey.localeCompare(a.sortKey));
+  }, [meetings, history, monthPrefix]);
+
+  const monthMeetingCount = monthActivity.filter(
+    (a) => a.kind === "meeting"
+  ).length;
+  const monthMemoCount = monthActivity.filter((a) => a.kind === "memo").length;
 
   const firstDay = new Date(view.y, view.m, 1).getDay();
   const daysInMonth = new Date(view.y, view.m + 1, 0).getDate();
@@ -181,15 +220,18 @@ export default function MeetingCalendar({
 
       <div className="mt-2.5 flex items-center justify-between gap-2 text-[12.5px]">
         <span className="min-w-0 flex-1 text-paper/55">
-          {view.m + 1}월 <span className="font-bold text-gold">{monthMeetings.length}</span>번 만남
+          {view.m + 1}월{" "}
+          <span className="font-bold text-gold">{monthMeetingCount}</span>번
+          만남
           {monthMemoCount > 0 && (
             <>
               {" "}
-              · <span className="font-semibold text-paper/75">{monthMemoCount}</span>개 메모
+              · <span className="font-semibold text-paper/75">{monthMemoCount}</span>
+              개 메모
             </>
           )}{" "}
-          · 올해{" "}
-          <span className="font-bold text-paper/75">{totalThisYear}</span>번
+          · 올해 <span className="font-bold text-paper/75">{totalThisYear}</span>
+          번
         </span>
         {alreadyToday ? (
           <button
@@ -209,39 +251,47 @@ export default function MeetingCalendar({
         )}
       </div>
 
-      <div className="mt-2.5 flex items-center gap-3 text-[11px] text-paper/50">
-        <span className="flex items-center gap-1">
-          <span className="h-[4px] w-[4px] rounded-full bg-gold" /> 만남
-        </span>
-        <span className="flex items-center gap-1">
-          <span className="h-[4px] w-[4px] rounded-full bg-paper/35" /> 메모 기록
-        </span>
-      </div>
-
-      {monthMeetings.length > 0 && (
-        <ul className="mt-3 space-y-1.5 border-t border-paper/6 pt-3">
-          {monthMeetings.map((m) => (
-            <li key={m.date} className="group flex items-center gap-2 text-[13.5px]">
-              <span className="w-[42px] shrink-0 font-semibold tabular-nums text-paper/55">
-                {m.date.slice(5).replace("-", ".")}
-              </span>
-              <div className="min-w-0 flex-1 text-paper/85">
-                {m.place && <span>{m.place}</span>}
-                {m.place && m.notes && (
-                  <span className="mx-1.5 text-paper/35">·</span>
-                )}
-                {m.notes && (
-                  <span className="text-paper/65">{m.notes}</span>
-                )}
-                {!m.place && !m.notes && (
-                  <span className="text-paper/45">만남</span>
-                )}
+      {monthActivity.length > 0 && (
+        <ul className="mt-3 space-y-2 border-t border-paper/6 pt-3">
+          {monthActivity.map((it) => (
+            <li
+              key={it.key}
+              className="flex gap-2.5 rounded-lg border border-paper/8 bg-surface px-3 py-2.5"
+            >
+              <TypeChip kind={it.kind} />
+              <div className="min-w-0 flex-1">
+                <div className="flex items-baseline gap-2 text-[12px] font-medium tabular-nums text-paper/50">
+                  <span>{it.date.slice(5).replace("-", ".")}</span>
+                  {it.kind === "memo" && (
+                    <span className="text-paper/40">{it.time}</span>
+                  )}
+                </div>
+                <div className="mt-0.5 break-words text-[13.5px] text-paper/85">
+                  {it.kind === "meeting" ? (
+                    <>
+                      {it.place && <span>{it.place}</span>}
+                      {it.place && it.notes && (
+                        <span className="mx-1.5 text-paper/35">·</span>
+                      )}
+                      {it.notes && (
+                        <span className="text-paper/65">{it.notes}</span>
+                      )}
+                      {!it.place && !it.notes && (
+                        <span className="text-paper/45">만남</span>
+                      )}
+                    </>
+                  ) : (
+                    <div className="whitespace-pre-wrap leading-relaxed">
+                      {it.raw}
+                    </div>
+                  )}
+                </div>
               </div>
-              {onRemoveMeeting && (
+              {it.kind === "meeting" && onRemoveMeeting && (
                 <button
-                  onClick={() => onRemoveMeeting(m.date)}
+                  onClick={() => onRemoveMeeting(it.date)}
                   aria-label="만남 기록 삭제"
-                  className="shrink-0 rounded-md p-1 text-paper/30 transition hover:bg-terra/10 hover:text-terra"
+                  className="shrink-0 self-start rounded-md p-1 text-paper/25 transition hover:bg-terra/10 hover:text-terra"
                 >
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
                     <path
@@ -257,6 +307,27 @@ export default function MeetingCalendar({
           ))}
         </ul>
       )}
+
+      {monthActivity.length === 0 && (
+        <div className="mt-3 rounded-lg bg-paper/4 px-4 py-4 text-center text-[12.5px] text-paper/50">
+          이 달엔 기록 없음
+        </div>
+      )}
     </div>
+  );
+}
+
+function TypeChip({ kind }: { kind: "meeting" | "memo" }) {
+  if (kind === "meeting") {
+    return (
+      <span className="flex h-[22px] shrink-0 items-center rounded-md bg-gold/15 px-1.5 text-[11px] font-bold text-gold">
+        만남
+      </span>
+    );
+  }
+  return (
+    <span className="flex h-[22px] shrink-0 items-center rounded-md bg-paper/8 px-1.5 text-[11px] font-bold text-paper/65">
+      메모
+    </span>
   );
 }

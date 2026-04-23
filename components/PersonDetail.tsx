@@ -349,36 +349,7 @@ export default function PersonDetail({
             </Section>
           )}
 
-          <Section title="히스토리">
-            {history === null ? (
-              <Empty>불러오는 중</Empty>
-            ) : history.length === 0 ? (
-              <Empty>없음</Empty>
-            ) : (
-              <ul className="space-y-2">
-                {history.map((h) => (
-                  <li
-                    key={h.id}
-                    className="rounded-lg border border-paper/8 bg-surface px-3.5 py-2.5"
-                  >
-                    <div className="text-[12px] font-medium tabular-nums text-paper/50">
-                      {new Date(h.created_at).toLocaleString("ko-KR", {
-                        month: "short",
-                        day: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </div>
-                    <div className="mt-1 whitespace-pre-wrap text-[14px] leading-relaxed text-paper/85">
-                      {h.raw_input}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </Section>
-
-          <Section title={`만남 기록 · ${person.meetings?.length ?? 0}번`}>
+          <Section title="기록">
             <MeetingCalendar
               meetings={person.meetings ?? []}
               history={history ?? []}
