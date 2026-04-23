@@ -1,0 +1,75 @@
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css");
+@import "tailwindcss";
+
+@theme {
+  /* Light theme — default */
+  --color-ink: #ffffff;
+  --color-surface: #ffffff;
+  --color-surface-2: #f7f8fa;
+  --color-paper: #212529;
+  --color-gold: #ff6f0f;
+  --color-gold-soft: #ff5a00;
+  --color-terra: #dc3545;
+
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system,
+    "Apple SD Gothic Neo", system-ui, sans-serif;
+}
+
+:root[data-theme="dark"] {
+  --color-ink: #1a1a1d;
+  --color-surface: #242427;
+  --color-surface-2: #2c2c30;
+  --color-paper: #e8e8ec;
+  --color-gold: #ff7a1a;
+  --color-gold-soft: #ff9040;
+  --color-terra: #ff6b6b;
+}
+
+html,
+body {
+  background: var(--color-ink);
+  color: var(--color-paper);
+  font-family: var(--font-sans);
+  font-feature-settings: "ss01", "ss02", "cv01", "tnum";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+body {
+  overscroll-behavior-y: none;
+}
+
+button {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  scrollbar-width: none;
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes sheet-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.anim-fade-up { animation: fade-up 160ms ease-out both; }
+.anim-fade-in { animation: fade-in 120ms ease-out both; }
+.anim-sheet-up { animation: sheet-up 180ms ease-out both; }
+
+*::selection {
+  background: color-mix(in oklab, var(--color-gold) 28%, transparent);
+}

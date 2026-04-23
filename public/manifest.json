@@ -1,0 +1,32 @@
+{
+  "name": "membar — 인맥 관리",
+  "short_name": "membar",
+  "description": "막 쳐도 AI가 정리해주는 인맥 관리 앱",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "lang": "ko",
+  "dir": "ltr",
+  "background_color": "#ffffff",
+  "theme_color": "#ff6f0f",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    { "name": "메모 등록", "short_name": "메모", "url": "/?new=1" },
+    { "name": "일정", "short_name": "일정", "url": "/schedule" },
+    { "name": "알림", "short_name": "알림", "url": "/notifications" }
+  ]
+}
