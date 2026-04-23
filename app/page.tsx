@@ -9,6 +9,8 @@ import SignInSheet from "@/components/SignInSheet";
 import TimelineSheet from "@/components/TimelineSheet";
 import DisambigSheet, { type Candidate } from "@/components/DisambigSheet";
 import PaywallSheet from "@/components/PaywallSheet";
+import InstallBanner from "@/components/InstallBanner";
+import InstallToast from "@/components/InstallToast";
 import { useUsage } from "@/lib/useUsage";
 import {
   GUEST_HARD_LIMIT,
@@ -48,6 +50,7 @@ export default function Home() {
     parsedName: string;
     candidates: Candidate[];
   } | null>(null);
+  const [installToastOpen, setInstallToastOpen] = useState(false);
 
   const { usage, refresh: refreshUsage } = useUsage(userId);
 
@@ -184,6 +187,16 @@ export default function Home() {
       }
       setMode({ kind: "closed" });
       void refreshUsage();
+
+      // First-memo install nudge (once per browser)
+      try {
+        if (saved && !localStorage.getItem("membar_install_toast_shown")) {
+          localStorage.setItem("membar_install_toast_shown", "1");
+          setInstallToastOpen(true);
+        }
+      } catch {
+        // ignore
+      }
     } finally {
       setSubmitting(false);
     }
@@ -217,6 +230,7 @@ export default function Home() {
 
   return (
     <main className="relative min-h-dvh">
+      <InstallBanner />
       <header className="sticky top-0 z-10 border-b border-paper/8 bg-ink px-4 pb-3 pt-4">
         <div className="flex items-center justify-between">
           <div className="flex items-baseline gap-2">
@@ -429,6 +443,10 @@ export default function Home() {
 
       {paywall && (
         <PaywallSheet reason={paywall} onClose={() => setPaywall(null)} />
+      )}
+
+      {installToastOpen && (
+        <InstallToast onClose={() => setInstallToastOpen(false)} />
       )}
 
       {timelineOpen && (
