@@ -51,6 +51,7 @@ export default function Home() {
     candidates: Candidate[];
   } | null>(null);
   const [installToastOpen, setInstallToastOpen] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const { usage, refresh: refreshUsage } = useUsage(userId);
 
@@ -140,39 +141,63 @@ export default function Home() {
   ) => {
     if (!userId) return;
     setSubmitting(true);
+    setSubmitError(null);
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 55_000);
+
     try {
       const res = await fetch("/api/persons", {
         method: editingId ? "PATCH" : "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ userId, input, id: editingId, forceCreate }),
+        signal: controller.signal,
       });
-      const body = await res.json();
+      clearTimeout(timeoutId);
 
-      if (body?.needsDisambiguation) {
+      let body: Record<string, unknown> = {};
+      try {
+        body = await res.json();
+      } catch {
+        // non-JSON response (e.g., gateway timeout HTML)
+      }
+
+      if ((body as { needsDisambiguation?: boolean })?.needsDisambiguation) {
         setDisambig({
           input,
-          parsedName: body.parsedName,
-          candidates: body.candidates as Candidate[],
+          parsedName: (body as { parsedName: string }).parsedName,
+          candidates: (body as { candidates: Candidate[] }).candidates,
         });
         setMode({ kind: "closed" });
         return;
       }
 
       if (!res.ok) {
-        if (body?.error === "limit") {
+        const err = (body as { error?: string })?.error;
+        if (err === "limit") {
           setPaywall("persons");
           setMode({ kind: "closed" });
           return;
         }
-        if (body?.error === "memo_limit") {
+        if (err === "memo_limit") {
           setPaywall("memos");
           setMode({ kind: "closed" });
           return;
         }
-        alert(body?.error ?? "저장 실패");
+        if (err === "rate_limit" || res.status === 429) {
+          setSubmitError(
+            "AI 서버가 바빠요. 10초 뒤 다시 시도해주세요."
+          );
+          return;
+        }
+        if (res.status >= 500) {
+          setSubmitError("서버 오류. 잠시 후 다시 시도해주세요.");
+          return;
+        }
+        setSubmitError(err ?? "저장 실패. 다시 시도해주세요.");
         return;
       }
-      const saved = body?.person as Person | undefined;
+      const saved = (body as { person?: Person })?.person;
       if (saved) {
         setPersons((prev) => {
           if (!prev) return [saved];
@@ -196,6 +221,15 @@ export default function Home() {
         }
       } catch {
         // ignore
+      }
+    } catch (e) {
+      clearTimeout(timeoutId);
+      if ((e as Error)?.name === "AbortError") {
+        setSubmitError(
+          "응답이 너무 늦어요. 네트워크 확인 후 다시 시도해주세요."
+        );
+      } else {
+        setSubmitError("연결 오류. 다시 시도해주세요.");
       }
     } finally {
       setSubmitting(false);
@@ -383,7 +417,11 @@ export default function Home() {
           memosUsed={memosUsed}
           memoLimit={MONTHLY_MEMO_LIMIT}
           memoWarnAt={MEMO_WARN_AT}
-          onClose={() => setMode({ kind: "closed" })}
+          error={submitError}
+          onClose={() => {
+            setSubmitError(null);
+            setMode({ kind: "closed" });
+          }}
           onSubmit={(text) => handleSubmit(text)}
           submitting={submitting}
         />
@@ -397,7 +435,11 @@ export default function Home() {
           memosUsed={memosUsed}
           memoLimit={MONTHLY_MEMO_LIMIT}
           memoWarnAt={MEMO_WARN_AT}
-          onClose={() => setMode({ kind: "detail", person: mode.person })}
+          error={submitError}
+          onClose={() => {
+            setSubmitError(null);
+            setMode({ kind: "detail", person: mode.person });
+          }}
           onSubmit={(text) => handleSubmit(text, mode.person.id)}
           submitting={submitting}
         />

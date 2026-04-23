@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
+import Anthropic from "@anthropic-ai/sdk";
 import { getServerSupabase } from "@/lib/supabase";
+import { parseMemo } from "@/lib/parseMemo";
 import {
   FREE_LIMIT,
   MONTHLY_MEMO_LIMIT,
@@ -11,6 +13,7 @@ import {
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export const runtime = "nodejs";
+export const maxDuration = 60;
 
 type DbPerson = Omit<Person, "todos" | "meetings"> & {
   todos: Todo[];
@@ -178,25 +181,6 @@ async function memosThisMonth(
   return count ?? 0;
 }
 
-async function callParse(
-  input: string,
-  existing: DbPerson | null,
-  origin: string
-): Promise<ParsedInput> {
-  const res = await fetch(`${origin}/api/parse`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ input, existing }),
-    cache: "no-store",
-  });
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body?.error || `parse failed: ${res.status}`);
-  }
-  const data = (await res.json()) as { parsed: ParsedInput };
-  return data.parsed;
-}
-
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const userId = url.searchParams.get("userId");
@@ -234,7 +218,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "memo_limit" }, { status: 402 });
     }
 
-    const parsed = await callParse(input, null, new URL(req.url).origin);
+    const parsed = await parseMemo(input, null);
     const nameCandidate = parsed.name?.trim();
 
     let existing: DbPerson | null = null;
@@ -334,6 +318,18 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ person: saved, parsed });
   } catch (err) {
+    if (err instanceof Anthropic.RateLimitError) {
+      return NextResponse.json(
+        { error: "rate_limit" },
+        { status: 429 }
+      );
+    }
+    if (err instanceof Anthropic.APIError) {
+      return NextResponse.json(
+        { error: err.message },
+        { status: err.status ?? 500 }
+      );
+    }
     const msg = err instanceof Error ? err.message : String(err);
     return NextResponse.json({ error: msg }, { status: 500 });
   }
@@ -397,11 +393,7 @@ export async function PATCH(req: Request) {
     if (exErr || !existing)
       return NextResponse.json({ error: "not found" }, { status: 404 });
 
-    const parsed = await callParse(
-      input,
-      existing as DbPerson,
-      new URL(req.url).origin
-    );
+    const parsed = await parseMemo(input, existing as DbPerson);
     const mergedPatch = applyParsedToPerson(
       existing as DbPerson,
       parsed,
@@ -426,6 +418,18 @@ export async function PATCH(req: Request) {
 
     return NextResponse.json({ person: saved, parsed });
   } catch (err) {
+    if (err instanceof Anthropic.RateLimitError) {
+      return NextResponse.json(
+        { error: "rate_limit" },
+        { status: 429 }
+      );
+    }
+    if (err instanceof Anthropic.APIError) {
+      return NextResponse.json(
+        { error: err.message },
+        { status: err.status ?? 500 }
+      );
+    }
     const msg = err instanceof Error ? err.message : String(err);
     return NextResponse.json({ error: msg }, { status: 500 });
   }

@@ -3,6 +3,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import type { Briefing, HistoryEntry, Person } from "@/lib/types";
 
 export const runtime = "nodejs";
+export const maxDuration = 60;
 
 const SYSTEM_PROMPT = `너는 비즈니스 미팅 전 브리핑 생성 엔진이야.
 주어진 인물 데이터와 히스토리를 읽고, 만나기 직전 5초 안에 훑어볼 수 있는 간결한 브리핑을 save_briefing 도구로 반환해.

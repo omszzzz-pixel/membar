@@ -2,6 +2,15 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useLockBodyScroll } from "@/lib/useLockBodyScroll";
+import { useRotatingText } from "@/lib/useRotatingText";
+
+const LOADING_STEPS = [
+  "메모 읽는 중…",
+  "이름 찾는 중…",
+  "관심사·태그 뽑는 중…",
+  "기존 기록과 합치는 중…",
+  "저장 중…",
+] as const;
 
 type Props = {
   title: string;
@@ -11,6 +20,7 @@ type Props = {
   memosUsed?: number;
   memoLimit?: number;
   memoWarnAt?: number;
+  error?: string | null;
   submitting?: boolean;
   onSubmit: (text: string) => void | Promise<void>;
   onClose: () => void;
@@ -24,12 +34,14 @@ export default function InputModal({
   memosUsed,
   memoLimit,
   memoWarnAt,
+  error,
   submitting = false,
   onSubmit,
   onClose,
 }: Props) {
   useLockBodyScroll();
   const [text, setText] = useState(initial);
+  const loadingStep = useRotatingText(LOADING_STEPS, 1700, submitting);
   const ref = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -122,27 +134,87 @@ export default function InputModal({
           </div>
         )}
 
-        {examples && examples.length > 0 && (
-          <div className="mt-3">
-            <div className="mb-1.5 text-[12px] font-semibold text-paper/55">
-              예시
+        {error && !atMemoLimit && (
+          <div className="mt-2 flex items-start gap-2 rounded-lg border border-terra/30 bg-terra/8 px-3.5 py-2.5 text-[13px] leading-relaxed text-terra">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              className="mt-[2px] shrink-0"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="9"
+                stroke="currentColor"
+                strokeWidth="1.75"
+              />
+              <path
+                d="M12 8v5M12 16v.5"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+            </svg>
+            <span>{error}</span>
+          </div>
+        )}
+
+        {submitting ? (
+          <div className="mt-3 rounded-lg border border-gold/30 bg-gold/8 px-3.5 py-3">
+            <div className="flex items-center gap-3">
+              <Spinner />
+              <div className="min-w-0 flex-1">
+                <div className="text-[13.5px] font-semibold text-paper">
+                  {loadingStep}
+                </div>
+                <div className="mt-0.5 text-[12px] text-paper/55">
+                  AI가 정리하고 있어요 · 보통 5~10초
+                </div>
+              </div>
             </div>
-            <div className="flex flex-wrap gap-1.5">
-              {examples.map((ex, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => {
-                    setText(ex);
-                    ref.current?.focus();
-                  }}
-                  className="rounded-md bg-paper/6 px-2.5 py-1.5 text-[12.5px] text-paper/70 transition hover:bg-paper/10 hover:text-paper"
-                >
-                  {ex}
-                </button>
-              ))}
+            <div className="mt-2.5 flex gap-1.5">
+              {LOADING_STEPS.map((_, i) => {
+                const activeIdx = LOADING_STEPS.indexOf(
+                  loadingStep as (typeof LOADING_STEPS)[number]
+                );
+                const done = i <= activeIdx;
+                return (
+                  <span
+                    key={i}
+                    className={`h-1 flex-1 rounded-full transition-colors ${
+                      done ? "bg-gold" : "bg-paper/10"
+                    }`}
+                  />
+                );
+              })}
             </div>
           </div>
+        ) : (
+          examples &&
+          examples.length > 0 && (
+            <div className="mt-3">
+              <div className="mb-1.5 text-[12px] font-semibold text-paper/55">
+                예시
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {examples.map((ex, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => {
+                      setText(ex);
+                      ref.current?.focus();
+                    }}
+                    className="rounded-md bg-paper/6 px-2.5 py-1.5 text-[12.5px] text-paper/70 transition hover:bg-paper/10 hover:text-paper"
+                  >
+                    {ex}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )
         )}
 
         <div className="mt-4 flex items-center justify-between">
@@ -152,12 +224,42 @@ export default function InputModal({
           <button
             onClick={submit}
             disabled={!canSubmit}
-            className="rounded-lg bg-gold px-5 py-2.5 text-[14px] font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-40 enabled:hover:bg-gold-soft"
+            className="flex items-center gap-1.5 rounded-lg bg-gold px-5 py-2.5 text-[14px] font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-60 enabled:hover:bg-gold-soft"
           >
-            {submitting ? "정리 중…" : "등록"}
+            {submitting && (
+              <span className="inline-flex h-3 w-3 animate-spin rounded-full border-[1.75px] border-white/40 border-t-white" />
+            )}
+            {submitting ? "정리 중" : error ? "다시 시도" : "등록"}
           </button>
         </div>
       </div>
     </div>
+  );
+}
+
+function Spinner() {
+  return (
+    <svg
+      className="shrink-0 animate-spin text-gold"
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill="none"
+    >
+      <circle
+        cx="12"
+        cy="12"
+        r="9"
+        stroke="currentColor"
+        strokeOpacity="0.25"
+        strokeWidth="2.5"
+      />
+      <path
+        d="M21 12a9 9 0 0 0-9-9"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+      />
+    </svg>
   );
 }

@@ -4,6 +4,15 @@ import { useCallback, useEffect, useState } from "react";
 import Avatar from "./Avatar";
 import type { Briefing, HistoryEntry, Person } from "@/lib/types";
 import { useLockBodyScroll } from "@/lib/useLockBodyScroll";
+import { useRotatingText } from "@/lib/useRotatingText";
+
+const BRIEFING_STEPS = [
+  "히스토리 읽는 중…",
+  "최근 대화 정리 중…",
+  "이번에 꺼낼 얘깃거리 찾는 중…",
+  "챙길 것 모으는 중…",
+  "브리핑 만드는 중…",
+] as const;
 
 type Props = {
   person: Person;
@@ -16,21 +25,50 @@ export default function BriefingSheet({ person, history, onClose }: Props) {
   const [briefing, setBriefing] = useState<Briefing | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const loadingStep = useRotatingText(BRIEFING_STEPS, 1800, loading);
 
   const generate = useCallback(async () => {
     setLoading(true);
     setError(null);
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 55_000);
+
     try {
       const res = await fetch("/api/briefing", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ person, history }),
+        signal: controller.signal,
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "브리핑 생성 실패");
-      setBriefing(data.briefing);
+      clearTimeout(timeoutId);
+
+      let data: Record<string, unknown> = {};
+      try {
+        data = await res.json();
+      } catch {
+        // non-JSON
+      }
+
+      if (!res.ok) {
+        if (res.status === 429) {
+          throw new Error("AI 서버가 바빠요. 잠시 후 다시 시도해주세요.");
+        }
+        if (res.status >= 500) {
+          throw new Error("서버 오류. 잠시 후 다시 시도해주세요.");
+        }
+        throw new Error(
+          (data as { error?: string }).error || "브리핑 생성 실패"
+        );
+      }
+      setBriefing((data as { briefing: Briefing }).briefing);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "실패");
+      clearTimeout(timeoutId);
+      if ((e as Error)?.name === "AbortError") {
+        setError("응답이 너무 늦어요. 네트워크 확인 후 다시 시도해주세요.");
+      } else {
+        setError(e instanceof Error ? e.message : "실패");
+      }
     } finally {
       setLoading(false);
     }
@@ -78,10 +116,31 @@ export default function BriefingSheet({ person, history, onClose }: Props) {
 
         <div className="overflow-y-auto px-5 pb-6 pt-4 scrollbar-none">
           {loading && (
-            <div className="flex flex-col items-center gap-3 pt-14 pb-10">
+            <div className="mt-2 flex flex-col items-center gap-4 py-10">
               <Spinner />
-              <div className="text-[14px] font-medium text-paper/60">
-                AI가 히스토리를 읽고 있어요
+              <div className="text-center">
+                <div className="text-[15px] font-semibold text-paper">
+                  {loadingStep}
+                </div>
+                <div className="mt-1 text-[12.5px] text-paper/55">
+                  보통 5~10초 정도 걸려요
+                </div>
+              </div>
+              <div className="mt-1 flex gap-1.5">
+                {BRIEFING_STEPS.map((_, i) => {
+                  const activeIdx = BRIEFING_STEPS.indexOf(
+                    loadingStep as (typeof BRIEFING_STEPS)[number]
+                  );
+                  const done = i <= activeIdx;
+                  return (
+                    <span
+                      key={i}
+                      className={`h-1 w-6 rounded-full transition-colors ${
+                        done ? "bg-gold" : "bg-paper/10"
+                      }`}
+                    />
+                  );
+                })}
               </div>
             </div>
           )}
