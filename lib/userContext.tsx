@@ -104,6 +104,40 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       if (!initialized) return;
 
       if (event === "SIGNED_IN" && session?.user && session.access_token) {
+        // Fire a one-time signup notification per user (dedup in localStorage).
+        try {
+          const key = `membar_signup_notified_${session.user.id}`;
+          if (!localStorage.getItem(key)) {
+            const created = session.user.created_at
+              ? Date.parse(session.user.created_at)
+              : 0;
+            const isFreshSignup =
+              !created || Date.now() - created < 10 * 60 * 1000;
+            localStorage.setItem(key, "1");
+            if (isFreshSignup) {
+              const meta = (session.user.user_metadata ?? {}) as Record<
+                string,
+                unknown
+              >;
+              void fetch("/api/notify", {
+                method: "POST",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify({
+                  event: "signup",
+                  userId: session.user.id,
+                  email: session.user.email ?? null,
+                  name:
+                    (meta.name as string | undefined) ??
+                    (meta.full_name as string | undefined) ??
+                    (meta.nickname as string | undefined) ??
+                    null,
+                }),
+              }).catch(() => {});
+            }
+          }
+        } catch {
+          // ignore
+        }
         // Migrate local data then force a full reload so every screen
         // (PaywallSheet, /me, nudges, etc.) reflects the new auth state.
         const after = () => {

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { getServerSupabase } from "@/lib/supabase";
 import { parseMemo } from "@/lib/parseMemo";
+import { notifyAsync, fmtText } from "@/lib/telegram";
 import {
   FREE_LIMIT,
   MONTHLY_MEMO_LIMIT,
@@ -326,6 +327,13 @@ export async function POST(req: Request) {
         raw_input: input,
         parsed_changes: parsed as unknown as Record<string, unknown>,
       });
+
+      const short = userId.slice(0, 8);
+      const isNew = !existing;
+      const head = isNew ? "👤 <b>새 인맥</b>" : "📝 <b>메모 추가</b>";
+      notifyAsync(
+        `${head}\n<code>${short}</code> · ${fmtText(saved.name, 40)}\n${fmtText(input, 200)}`
+      );
     }
 
     return NextResponse.json({ person: saved, parsed });
@@ -427,6 +435,16 @@ export async function PATCH(req: Request) {
       raw_input: input,
       parsed_changes: parsed as unknown as Record<string, unknown>,
     });
+
+    if (saved) {
+      const short = userId.slice(0, 8);
+      notifyAsync(
+        `📝 <b>메모 추가</b>\n<code>${short}</code> · ${fmtText(
+          (saved as DbPerson).name,
+          40
+        )}\n${fmtText(input, 200)}`
+      );
+    }
 
     return NextResponse.json({ person: saved, parsed });
   } catch (err) {

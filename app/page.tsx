@@ -496,6 +496,11 @@ export default function Home() {
           }}
           onSubmit={(text) => handleSubmit(text)}
           submitting={submitting}
+          onUpgrade={() => {
+            setSubmitError(null);
+            setMode({ kind: "closed" });
+            setPaywall("memos");
+          }}
         />
       )}
 
@@ -514,6 +519,11 @@ export default function Home() {
           }}
           onSubmit={(text) => handleSubmit(text, mode.person.id)}
           submitting={submitting}
+          onUpgrade={() => {
+            setSubmitError(null);
+            setMode({ kind: "detail", person: mode.person });
+            setPaywall("memos");
+          }}
         />
       )}
 

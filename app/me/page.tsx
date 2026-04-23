@@ -6,6 +6,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import SignInSheet from "@/components/SignInSheet";
 import PaywallSheet from "@/components/PaywallSheet";
 import InstallButton from "@/components/InstallButton";
+import FeedbackBox from "@/components/FeedbackBox";
 import { useUser } from "@/lib/userContext";
 import { useUsage } from "@/lib/useUsage";
 import {
@@ -198,10 +199,6 @@ export default function MePage() {
                 </span>
               </button>
             )}
-            <Divider />
-            <Row label="문의">
-              <span className="text-[12.5px] text-paper/45">준비 중</span>
-            </Row>
             {authed && (
               <>
                 <Divider />
@@ -219,6 +216,11 @@ export default function MePage() {
               </>
             )}
           </div>
+        </Section>
+
+        {/* Feedback */}
+        <Section title="개발자에게 바란다">
+          <FeedbackBox />
         </Section>
 
         <div className="mt-8 text-center text-[11.5px] text-paper/35">

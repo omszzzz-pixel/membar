@@ -24,6 +24,7 @@ type Props = {
   submitting?: boolean;
   onSubmit: (text: string) => void | Promise<void>;
   onClose: () => void;
+  onUpgrade?: () => void;
 };
 
 export default function InputModal({
@@ -38,6 +39,7 @@ export default function InputModal({
   submitting = false,
   onSubmit,
   onClose,
+  onUpgrade,
 }: Props) {
   useLockBodyScroll();
   const [text, setText] = useState(initial);
@@ -121,12 +123,41 @@ export default function InputModal({
           className="w-full resize-none rounded-lg border border-paper/10 bg-surface p-3.5 text-[15px] leading-relaxed text-paper outline-none transition placeholder:text-paper/40 focus:border-gold disabled:opacity-60"
         />
 
-        {atMemoLimit && (
-          <div className="mt-2 rounded-lg border border-terra/30 bg-terra/8 px-3.5 py-2.5 text-[12.5px] leading-relaxed text-terra">
-            <span className="font-semibold">이번 달 메모가 가득 찼어요</span>{" "}
-            <span className="text-paper/70">· 월 4,990원부터 Pro 이용 가능</span>
-          </div>
-        )}
+        {atMemoLimit &&
+          (onUpgrade ? (
+            <button
+              type="button"
+              onClick={onUpgrade}
+              className="mt-2 flex w-full items-center justify-between gap-2 rounded-lg border border-terra/30 bg-terra/8 px-3.5 py-2.5 text-left text-[12.5px] leading-relaxed text-terra transition hover:bg-terra/12"
+            >
+              <span className="min-w-0 flex-1">
+                <span className="font-semibold">이번 달 메모가 가득 찼어요</span>{" "}
+                <span className="text-paper/70">
+                  · 월 4,990원부터 Pro 이용 가능
+                </span>
+              </span>
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                className="shrink-0 text-terra"
+              >
+                <path
+                  d="M9 6l6 6-6 6"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+          ) : (
+            <div className="mt-2 rounded-lg border border-terra/30 bg-terra/8 px-3.5 py-2.5 text-[12.5px] leading-relaxed text-terra">
+              <span className="font-semibold">이번 달 메모가 가득 찼어요</span>{" "}
+              <span className="text-paper/70">· 월 4,990원부터 Pro 이용 가능</span>
+            </div>
+          ))}
 
         {!atMemoLimit && showMemoWarn && memoRemaining !== undefined && (
           <div className="mt-2 text-[12px] font-medium text-paper/60">

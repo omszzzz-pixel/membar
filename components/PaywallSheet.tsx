@@ -44,7 +44,7 @@ function formatWon(n: number): string {
 
 export default function PaywallSheet({ reason, onClose }: Props) {
   useLockBodyScroll();
-  const { authed, signInWithKakao } = useUser();
+  const { authed, signInWithKakao, userId, email, name } = useUser();
   const [selected, setSelected] = useState<Plan["id"]>("12m");
 
   useEffect(() => {
@@ -54,6 +54,28 @@ export default function PaywallSheet({ reason, onClose }: Props) {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
+
+  // Notify owner when paywall is opened (dedup per session + reason).
+  useEffect(() => {
+    try {
+      const key = `membar_paywall_opened_${reason ?? "default"}`;
+      if (sessionStorage.getItem(key)) return;
+      sessionStorage.setItem(key, "1");
+      void fetch("/api/notify", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          event: "paywall_open",
+          userId: authed ? userId : null,
+          email,
+          name,
+          detail: reason ? `사유: ${reason}` : null,
+        }),
+      }).catch(() => {});
+    } catch {
+      // ignore
+    }
+  }, [reason, authed, userId, email, name]);
 
   const hook =
     reason === "persons"
@@ -67,6 +89,18 @@ export default function PaywallSheet({ reason, onClose }: Props) {
       alert("로그인 후 결제할 수 있어요");
       return;
     }
+    const plan = PLANS.find((p) => p.id === selected);
+    void fetch("/api/notify", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        event: "payment_attempt",
+        userId,
+        email,
+        name,
+        detail: plan ? `${plan.label} · ${formatWon(plan.price)}` : null,
+      }),
+    }).catch(() => {});
     alert("결제는 추후 연결 예정이에요");
   };
 
