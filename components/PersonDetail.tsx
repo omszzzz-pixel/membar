@@ -194,7 +194,7 @@ export default function PersonDetail({
         <div className="px-5 pt-3">
           <button
             onClick={() => setBriefingOpen(true)}
-            className="flex w-full items-center justify-between rounded-lg bg-gold/10 px-4 py-3 transition hover:bg-gold/14"
+            className="flex w-full items-center justify-between rounded-lg border border-gold/35 bg-gold/10 px-4 py-3 transition hover:bg-gold/14"
           >
             <div className="flex items-center gap-2.5">
               <svg
