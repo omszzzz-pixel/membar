@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useLockBodyScroll } from "@/lib/useLockBodyScroll";
 
 type Props = {
   title: string;
@@ -27,6 +28,7 @@ export default function InputModal({
   onSubmit,
   onClose,
 }: Props) {
+  useLockBodyScroll();
   const [text, setText] = useState(initial);
   const ref = useRef<HTMLTextAreaElement>(null);
 

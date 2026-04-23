@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useUser } from "@/lib/userContext";
+import { useLockBodyScroll } from "@/lib/useLockBodyScroll";
 
 type Plan = {
   id: "1m" | "6m" | "12m";
@@ -41,6 +42,7 @@ function formatWon(n: number): string {
 }
 
 export default function PaywallSheet({ reason, onClose }: Props) {
+  useLockBodyScroll();
   const { authed, signInWithKakao, signInWithGoogle } = useUser();
   const [selected, setSelected] = useState<Plan["id"]>("12m");
 

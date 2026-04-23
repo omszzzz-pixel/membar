@@ -8,6 +8,7 @@ import ShareSheet from "./ShareSheet";
 import type { HistoryEntry, Meeting, Person, Todo } from "@/lib/types";
 import { SAMPLE_HISTORY, isSample } from "@/lib/sampleData";
 import { formatShareText } from "@/lib/shareText";
+import { useLockBodyScroll } from "@/lib/useLockBodyScroll";
 
 type Props = {
   person: Person;
@@ -26,6 +27,7 @@ export default function PersonDetail({
   onDelete,
   onUpdate,
 }: Props) {
+  useLockBodyScroll();
   const [history, setHistory] = useState<HistoryEntry[] | null>(null);
   const [briefingOpen, setBriefingOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);

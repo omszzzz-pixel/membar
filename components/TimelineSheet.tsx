@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { TimelineItem } from "@/lib/types";
+import { useLockBodyScroll } from "@/lib/useLockBodyScroll";
 
 type Props = {
   userId: string;
@@ -43,6 +44,7 @@ export default function TimelineSheet({
   onClose,
   onPersonClick,
 }: Props) {
+  useLockBodyScroll();
   const [items, setItems] = useState<TimelineItem[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 

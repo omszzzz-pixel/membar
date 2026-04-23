@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useLockBodyScroll } from "@/lib/useLockBodyScroll";
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -115,6 +116,7 @@ export default function InstallButton() {
 }
 
 function IosGuide({ onClose }: { onClose: () => void }) {
+  useLockBodyScroll();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();

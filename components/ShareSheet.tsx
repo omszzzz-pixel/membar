@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useLockBodyScroll } from "@/lib/useLockBodyScroll";
 
 type Props = {
   title: string;
@@ -9,6 +10,7 @@ type Props = {
 };
 
 export default function ShareSheet({ title, text, onClose }: Props) {
+  useLockBodyScroll();
   const [value, setValue] = useState(text);
   const [copied, setCopied] = useState(false);
   const [canShare, setCanShare] = useState(false);

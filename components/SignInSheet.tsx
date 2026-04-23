@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useUser } from "@/lib/userContext";
+import { useLockBodyScroll } from "@/lib/useLockBodyScroll";
 
 type Props = {
   title?: string;
@@ -16,6 +17,7 @@ export default function SignInSheet({
   dismissible = true,
   onClose,
 }: Props) {
+  useLockBodyScroll();
   const { signInWithKakao, signInWithGoogle } = useUser();
   const [loading, setLoading] = useState(false);
 

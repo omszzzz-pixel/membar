@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import Avatar from "./Avatar";
+import { useLockBodyScroll } from "@/lib/useLockBodyScroll";
 
 export type Candidate = {
   id: string;
@@ -47,6 +48,7 @@ export default function DisambigSheet({
   onCreateNew,
   onClose,
 }: Props) {
+  useLockBodyScroll();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();

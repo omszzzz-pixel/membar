@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Avatar from "./Avatar";
 import type { Briefing, HistoryEntry, Person } from "@/lib/types";
+import { useLockBodyScroll } from "@/lib/useLockBodyScroll";
 
 type Props = {
   person: Person;
@@ -11,6 +12,7 @@ type Props = {
 };
 
 export default function BriefingSheet({ person, history, onClose }: Props) {
+  useLockBodyScroll();
   const [briefing, setBriefing] = useState<Briefing | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
