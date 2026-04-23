@@ -121,9 +121,11 @@ export default function Home() {
   const count = persons?.length ?? 0;
   const memosUsed = usage.memos;
   const softNudge =
-    !authed && count >= GUEST_SOFT_NUDGE && count < GUEST_MEDIUM_NUDGE;
+    count >= GUEST_SOFT_NUDGE && count < GUEST_MEDIUM_NUDGE;
   const mediumNudge =
-    !authed && count >= GUEST_MEDIUM_NUDGE && count < GUEST_HARD_LIMIT;
+    count >= GUEST_MEDIUM_NUDGE && count < GUEST_HARD_LIMIT;
+  const memoNudge =
+    memosUsed >= MEMO_WARN_AT && memosUsed < MONTHLY_MEMO_LIMIT;
   const atPersonLimit = count >= GUEST_HARD_LIMIT;
   const atMemoLimit = memosUsed >= MONTHLY_MEMO_LIMIT;
 
@@ -353,17 +355,21 @@ export default function Home() {
         <div className="mx-4 mt-3 flex items-start gap-3 rounded-lg border border-paper/10 bg-paper/4 px-3.5 py-3">
           <div className="min-w-0 flex-1">
             <div className="text-[13.5px] font-semibold text-paper">
-              기록이 {count}개 쌓였어요
+              기록이 {count}명 쌓였어요
             </div>
             <div className="mt-0.5 text-[12.5px] leading-relaxed text-paper/65">
-              앱 삭제하면 사라질 수 있어요. 로그인하면 안전하게 보관돼요.
+              {authed
+                ? `${GUEST_HARD_LIMIT}명까지 무료예요. Pro는 무제한.`
+                : "앱 삭제하면 사라질 수 있어요. 로그인하면 안전하게 보관돼요."}
             </div>
           </div>
           <button
-            onClick={() => setSignInOpen(true)}
+            onClick={() =>
+              authed ? setPaywall("persons") : setSignInOpen(true)
+            }
             className="shrink-0 rounded-md bg-paper/10 px-3 py-1.5 text-[12.5px] font-semibold text-paper hover:bg-paper/18"
           >
-            안전하게
+            {authed ? "Pro" : "안전하게"}
           </button>
         </div>
       )}
@@ -389,14 +395,56 @@ export default function Home() {
               {GUEST_HARD_LIMIT}명까지 {GUEST_HARD_LIMIT - count}자리 남았어요
             </div>
             <div className="mt-0.5 text-[12.5px] leading-relaxed text-paper/70">
-              계정 만들면 Pro로 무제한 사용 가능해요. 1분 만에 가입.
+              {authed
+                ? "Pro로 업그레이드하면 무제한 사용 가능해요."
+                : "계정 만들면 Pro로 무제한 사용 가능해요. 1분 만에 가입."}
             </div>
           </div>
           <button
-            onClick={() => setSignInOpen(true)}
+            onClick={() =>
+              authed ? setPaywall("persons") : setSignInOpen(true)
+            }
             className="shrink-0 rounded-md bg-gold px-3 py-1.5 text-[12.5px] font-semibold text-white hover:bg-gold-soft"
           >
-            가입
+            {authed ? "업그레이드" : "가입"}
+          </button>
+        </div>
+      )}
+
+      {memoNudge && !userLoading && (
+        <div className="mx-4 mt-3 flex items-start gap-3 rounded-lg border border-gold/30 bg-gold/10 px-3.5 py-3">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            className="mt-[2px] shrink-0 text-gold"
+          >
+            <path
+              d="M4 4h16v16H4z M4 9h16 M9 4v16"
+              stroke="currentColor"
+              strokeWidth="1.75"
+              strokeLinejoin="round"
+              fill="none"
+            />
+          </svg>
+          <div className="min-w-0 flex-1">
+            <div className="text-[13.5px] font-semibold text-paper">
+              이번 달 메모 {MONTHLY_MEMO_LIMIT - memosUsed}개 남았어요
+            </div>
+            <div className="mt-0.5 text-[12.5px] leading-relaxed text-paper/70">
+              {authed
+                ? "Pro로 업그레이드하면 메모 무제한이에요."
+                : "계정 만들고 Pro 업그레이드하면 무제한 메모."}
+            </div>
+          </div>
+          <button
+            onClick={() =>
+              authed ? setPaywall("memos") : setSignInOpen(true)
+            }
+            className="shrink-0 rounded-md bg-gold px-3 py-1.5 text-[12.5px] font-semibold text-white hover:bg-gold-soft"
+          >
+            {authed ? "업그레이드" : "가입"}
           </button>
         </div>
       )}
@@ -528,7 +576,9 @@ export default function Home() {
           userId={userId}
           onClose={() => setTimelineOpen(false)}
           onPersonClick={(personId) => {
-            const p = persons?.find((x) => x.id === personId);
+            const p =
+              persons?.find((x) => x.id === personId) ??
+              SAMPLE_PERSONS.find((x) => x.id === personId);
             if (p) {
               setTimelineOpen(false);
               setMode({ kind: "detail", person: p });

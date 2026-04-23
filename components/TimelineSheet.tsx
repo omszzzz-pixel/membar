@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { TimelineItem } from "@/lib/types";
 import { useLockBodyScroll } from "@/lib/useLockBodyScroll";
+import { getSampleTimelineItems } from "@/lib/sampleData";
 
 type Props = {
   userId: string;
@@ -72,17 +73,20 @@ export default function TimelineSheet({
     };
   }, [userId]);
 
+  const showingSamples = items !== null && items.length === 0;
+  const effectiveItems = showingSamples ? getSampleTimelineItems() : items ?? [];
+
   const groups = useMemo<[string, TimelineItem[]][]>(() => {
-    if (!items) return [];
+    if (effectiveItems.length === 0) return [];
     const m = new Map<string, TimelineItem[]>();
-    for (const it of items) {
+    for (const it of effectiveItems) {
       const k = dayKey(it.created_at);
       const arr = m.get(k) ?? [];
       arr.push(it);
       m.set(k, arr);
     }
     return Array.from(m.entries());
-  }, [items]);
+  }, [effectiveItems]);
 
   return (
     <div
@@ -126,22 +130,19 @@ export default function TimelineSheet({
             </div>
           )}
 
-          {items && items.length === 0 && (
-            <div className="pt-14 text-center">
-              <div className="text-[15px] font-semibold text-paper/75">
-                아직 기록이 없어요
-              </div>
-              <div className="mt-1.5 text-[13.5px] text-paper/50">
-                인맥을 추가하면 여기에 시간순으로 쌓여요.
-              </div>
-              {error && (
-                <div className="mt-3 text-[12px] text-terra">{error}</div>
-              )}
-            </div>
-          )}
-
-          {items && items.length > 0 && (
+          {items !== null && (
             <div>
+              {showingSamples && (
+                <div className="mb-4 flex items-start gap-2.5 rounded-lg border border-gold/25 bg-gold/8 px-3.5 py-3">
+                  <span className="mt-[2px] shrink-0 rounded bg-gold/20 px-1.5 py-[1px] text-[10.5px] font-semibold text-gold">
+                    예시
+                  </span>
+                  <div className="text-[12.5px] leading-relaxed text-paper/75">
+                    실제 기록이 없어서 예시 타임라인을 보여드려요. 홈에서 메모를
+                    등록하면 여기에 진짜 기록이 쌓여요.
+                  </div>
+                </div>
+              )}
               {groups.map(([day, dayItems]) => (
                 <div key={day} className="mb-5 last:mb-0">
                   <div className="sticky top-0 z-[1] -mx-5 bg-surface px-5 py-1.5">

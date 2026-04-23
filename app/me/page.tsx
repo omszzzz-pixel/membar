@@ -10,6 +10,7 @@ import { useUser } from "@/lib/userContext";
 import { useUsage } from "@/lib/useUsage";
 import {
   GUEST_HARD_LIMIT,
+  MEMO_WARN_AT,
   MONTHLY_MEMO_LIMIT,
   type Person,
 } from "@/lib/types";
@@ -57,7 +58,7 @@ export default function MePage() {
   const memoBarColor =
     usage.memos >= MONTHLY_MEMO_LIMIT
       ? "bg-terra"
-      : usage.memos >= 25
+      : usage.memos >= MEMO_WARN_AT
       ? "bg-gold"
       : "bg-gold/70";
 
@@ -127,7 +128,7 @@ export default function MePage() {
               <div className="mt-2 text-[12px] font-medium text-terra">
                 이번 달 메모 한도 도달. 다음 달 1일에 초기화돼요.
               </div>
-            ) : usage.memos >= 25 ? (
+            ) : usage.memos >= MEMO_WARN_AT ? (
               <div className="mt-2 text-[12px] font-medium text-paper/60">
                 이번 달 {MONTHLY_MEMO_LIMIT - usage.memos}개 남았어요
               </div>

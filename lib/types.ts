@@ -70,12 +70,12 @@ export type ParsedInput = {
 
 export type SortKey = "recent" | "name" | "favorite";
 
-export const FREE_LIMIT = 10;
-export const GUEST_SOFT_NUDGE = 5;
-export const GUEST_MEDIUM_NUDGE = 8;
-export const GUEST_HARD_LIMIT = 10;
-export const MONTHLY_MEMO_LIMIT = 30;
-export const MEMO_WARN_AT = 25;
+export const FREE_LIMIT = 5;
+export const GUEST_SOFT_NUDGE = 3;
+export const GUEST_MEDIUM_NUDGE = 4;
+export const GUEST_HARD_LIMIT = 5;
+export const MONTHLY_MEMO_LIMIT = 10;
+export const MEMO_WARN_AT = 8;
 export const STALE_DAYS = 30;
 
 export type Usage = { persons: number; memos: number };

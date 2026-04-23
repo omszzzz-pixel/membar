@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useUser } from "@/lib/userContext";
 import { useLockBodyScroll } from "@/lib/useLockBodyScroll";
+import { GUEST_HARD_LIMIT, MONTHLY_MEMO_LIMIT } from "@/lib/types";
 
 type Plan = {
   id: "1m" | "6m" | "12m";
@@ -43,7 +44,7 @@ function formatWon(n: number): string {
 
 export default function PaywallSheet({ reason, onClose }: Props) {
   useLockBodyScroll();
-  const { authed, signInWithKakao, signInWithGoogle } = useUser();
+  const { authed, signInWithKakao } = useUser();
   const [selected, setSelected] = useState<Plan["id"]>("12m");
 
   useEffect(() => {
@@ -56,9 +57,9 @@ export default function PaywallSheet({ reason, onClose }: Props) {
 
   const hook =
     reason === "persons"
-      ? "무료 인원 10명을 다 썼어요"
+      ? `무료 인원 ${GUEST_HARD_LIMIT}명을 다 썼어요`
       : reason === "memos"
-      ? "이번 달 메모 30개를 다 썼어요"
+      ? `이번 달 메모 ${MONTHLY_MEMO_LIMIT}개를 다 썼어요`
       : null;
 
   const handlePay = async () => {
@@ -139,8 +140,8 @@ export default function PaywallSheet({ reason, onClose }: Props) {
               </div>
             </div>
             {[
-              ["인원", "10명", "무제한"],
-              ["메모", "월 30개", "무제한"],
+              ["인원", `${GUEST_HARD_LIMIT}명`, "무제한"],
+              ["메모", `월 ${MONTHLY_MEMO_LIMIT}개`, "무제한"],
               ["브리핑", "제한 있음", "무제한"],
             ].map(([k, a, b]) => (
               <div
@@ -210,47 +211,21 @@ export default function PaywallSheet({ reason, onClose }: Props) {
 
           {!authed && (
             <div className="mt-4 rounded-lg border border-paper/10 bg-paper/4 px-4 py-3.5">
-              <div className="text-[12.5px] font-semibold text-paper/70">
+              <div className="mb-2 text-[12.5px] font-semibold text-paper/70">
                 먼저 로그인이 필요해요
               </div>
-              <div className="mt-2 space-y-2">
-                <button
-                  onClick={signInWithKakao}
-                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#FEE500] py-2.5 text-[13.5px] font-semibold text-[#191919] hover:brightness-95"
-                >
-                  <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
-                    <path
-                      d="M9 2C4.58 2 1 4.82 1 8.3c0 2.24 1.48 4.2 3.68 5.3l-.94 3.44c-.06.22.2.4.4.28L8.1 15.3c.3.03.6.04.9.04 4.42 0 8-2.82 8-6.3S13.42 2 9 2z"
-                      fill="currentColor"
-                    />
-                  </svg>
-                  카카오로 계속하기
-                </button>
-                <button
-                  onClick={signInWithGoogle}
-                  className="flex w-full items-center justify-center gap-2 rounded-lg border border-paper/15 bg-surface py-2.5 text-[13.5px] font-semibold text-paper hover:bg-paper/4"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24">
-                    <path
-                      fill="#4285F4"
-                      d="M21.35 12.23c0-.73-.07-1.43-.2-2.1H12v4h5.2c-.22 1.2-.9 2.2-1.92 2.87v2.4h3.1c1.82-1.67 2.97-4.15 2.97-7.17z"
-                    />
-                    <path
-                      fill="#34A853"
-                      d="M12 21c2.6 0 4.78-.86 6.37-2.33l-3.1-2.4c-.86.58-1.96.92-3.27.92-2.51 0-4.64-1.7-5.4-3.98H3.4v2.49C4.98 18.73 8.2 21 12 21z"
-                    />
-                    <path
-                      fill="#FBBC05"
-                      d="M6.6 13.21c-.2-.58-.3-1.2-.3-1.85s.1-1.27.3-1.85V7.02H3.4C2.82 8.16 2.5 9.52 2.5 11c0 1.48.32 2.84.9 3.98l3.2-1.77z"
-                    />
-                    <path
-                      fill="#EA4335"
-                      d="M12 5.38c1.42 0 2.69.49 3.69 1.45l2.75-2.75C16.78 2.48 14.6 1.5 12 1.5 8.2 1.5 4.98 3.77 3.4 7.02l3.2 2.49C7.36 7.08 9.49 5.38 12 5.38z"
-                    />
-                  </svg>
-                  Google로 계속하기
-                </button>
-              </div>
+              <button
+                onClick={signInWithKakao}
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#FEE500] py-2.5 text-[13.5px] font-semibold text-[#191919] hover:brightness-95"
+              >
+                <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
+                  <path
+                    d="M9 2C4.58 2 1 4.82 1 8.3c0 2.24 1.48 4.2 3.68 5.3l-.94 3.44c-.06.22.2.4.4.28L8.1 15.3c.3.03.6.04.9.04 4.42 0 8-2.82 8-6.3S13.42 2 9 2z"
+                    fill="currentColor"
+                  />
+                </svg>
+                카카오로 계속하기
+              </button>
             </div>
           )}
         </div>

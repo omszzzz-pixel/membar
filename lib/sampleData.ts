@@ -1,4 +1,4 @@
-import type { HistoryEntry, Person } from "./types";
+import type { HistoryEntry, Person, TimelineItem } from "./types";
 
 export const SAMPLE_PREFIX = "__sample__";
 
@@ -209,3 +209,25 @@ export const EDIT_EXAMPLES = [
   "최근에 CTO로 승진",
   "다음 주 커피 약속 잡기",
 ];
+
+/**
+ * Flatten sample history into TimelineItem[] for demo display.
+ * Used when real history is empty to show a rich preview.
+ */
+export function getSampleTimelineItems(): TimelineItem[] {
+  const items: TimelineItem[] = [];
+  for (const person of SAMPLE_PERSONS) {
+    const history = SAMPLE_HISTORY[person.id] ?? [];
+    for (const h of history) {
+      items.push({
+        id: h.id,
+        person_id: person.id,
+        person_name: person.name,
+        person_favorite: person.is_favorite,
+        raw_input: h.raw_input,
+        created_at: h.created_at,
+      });
+    }
+  }
+  return items.sort((a, b) => b.created_at.localeCompare(a.created_at));
+}

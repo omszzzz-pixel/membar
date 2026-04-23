@@ -73,7 +73,12 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       });
     };
 
-    sb.auth.getSession().then(({ data }) => sync(data.session));
+    let initialized = false;
+
+    sb.auth.getSession().then(({ data }) => {
+      sync(data.session);
+      initialized = true;
+    });
 
     const migrate = async (authUserId: string, token: string) => {
       if (!local || local === authUserId) return;
@@ -95,8 +100,26 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
     const { data: sub } = sb.auth.onAuthStateChange((event, session) => {
       sync(session);
+      // Don't act on the initial session-restoration event.
+      if (!initialized) return;
+
       if (event === "SIGNED_IN" && session?.user && session.access_token) {
-        void migrate(session.user.id, session.access_token);
+        // Migrate local data then force a full reload so every screen
+        // (PaywallSheet, /me, nudges, etc.) reflects the new auth state.
+        const after = () => {
+          try {
+            window.location.reload();
+          } catch {
+            // ignore
+          }
+        };
+        migrate(session.user.id, session.access_token).finally(after);
+      } else if (event === "SIGNED_OUT") {
+        try {
+          window.location.reload();
+        } catch {
+          // ignore
+        }
       }
     });
 
@@ -109,12 +132,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     const sb = getBrowserSupabase();
     await sb.auth.signInWithOAuth({
       provider: "kakao",
-      options: {
-        redirectTo: window.location.origin,
-        // 이메일(account_email) scope는 Kakao 비즈 인증 필요 → 제외.
-        // 닉네임 + 프로필 사진만 요청.
-        scopes: "profile_nickname profile_image",
-      },
+      options: { redirectTo: window.location.origin },
     });
   }, []);
 
