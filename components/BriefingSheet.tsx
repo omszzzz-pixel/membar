@@ -5,6 +5,7 @@ import Avatar from "./Avatar";
 import type { Briefing, HistoryEntry, Person } from "@/lib/types";
 import { useLockBodyScroll } from "@/lib/useLockBodyScroll";
 import { useRotatingText } from "@/lib/useRotatingText";
+import { SAMPLE_BRIEFINGS, isSample } from "@/lib/sampleData";
 
 const BRIEFING_STEPS = [
   "히스토리 읽는 중…",
@@ -30,6 +31,18 @@ export default function BriefingSheet({ person, history, onClose }: Props) {
   const generate = useCallback(async () => {
     setLoading(true);
     setError(null);
+
+    // For sample persons, use pre-crafted briefings (instant, no API cost).
+    if (isSample(person.id)) {
+      const sampleBriefing = SAMPLE_BRIEFINGS[person.id];
+      if (sampleBriefing) {
+        // Small delay to show the loading animation briefly — feels natural.
+        await new Promise((r) => setTimeout(r, 900));
+        setBriefing(sampleBriefing);
+        setLoading(false);
+        return;
+      }
+    }
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 55_000);
