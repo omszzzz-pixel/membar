@@ -247,14 +247,18 @@ export default function PersonDetail({
 
         {sample && (
           <div
-            className={`overflow-hidden transition-all duration-300 ease-out ${
-              scrolled ? "max-h-0 opacity-0" : "mt-3 max-h-24 opacity-100"
+            className={`grid transition-all duration-300 ease-out ${
+              scrolled
+                ? "grid-rows-[0fr] opacity-0"
+                : "mt-3 grid-rows-[1fr] opacity-100"
             }`}
             aria-hidden={scrolled}
           >
-            <div className="mx-5 rounded-lg border border-gold/25 bg-gold/8 px-3.5 py-2.5 text-[13px] leading-relaxed text-paper/80">
-              <span className="font-semibold text-gold">예시</span> — 실제
-              데이터가 아닙니다. 이런 식으로 정리된다는 샘플이에요.
+            <div className="overflow-hidden">
+              <div className="mx-5 rounded-lg border border-gold/25 bg-gold/8 px-3.5 py-2.5 text-[13px] leading-relaxed text-paper/80">
+                <span className="font-semibold text-gold">예시</span> — 실제
+                데이터가 아닙니다. 이런 식으로 정리된다는 샘플이에요.
+              </div>
             </div>
           </div>
         )}
