@@ -109,7 +109,12 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     const sb = getBrowserSupabase();
     await sb.auth.signInWithOAuth({
       provider: "kakao",
-      options: { redirectTo: window.location.origin },
+      options: {
+        redirectTo: window.location.origin,
+        // 이메일(account_email) scope는 Kakao 비즈 인증 필요 → 제외.
+        // 닉네임 + 프로필 사진만 요청.
+        scopes: "profile_nickname profile_image",
+      },
     });
   }, []);
 
