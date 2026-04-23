@@ -98,6 +98,24 @@ export default function PersonDetail({
     void patch({ meetings: next });
   };
 
+  const removeMemo = async (memoId: string) => {
+    if (sample) {
+      setHistory((prev) => (prev ?? []).filter((h) => h.id !== memoId));
+      return;
+    }
+    // Optimistic remove
+    setHistory((prev) => (prev ?? []).filter((h) => h.id !== memoId));
+    try {
+      await fetch(
+        `/api/persons/history?id=${memoId}&userId=${encodeURIComponent(userId)}`,
+        { method: "DELETE" }
+      );
+    } catch {
+      // If network fails, reload history to stay consistent
+      void loadHistory();
+    }
+  };
+
   const subtitle = [person.title, person.company].filter(Boolean).join(" · ");
 
   return (
@@ -355,6 +373,7 @@ export default function PersonDetail({
               history={history ?? []}
               onAddToday={addTodayMeeting}
               onRemoveMeeting={removeMeeting}
+              onRemoveMemo={removeMemo}
             />
           </Section>
         </div>

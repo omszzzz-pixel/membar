@@ -221,6 +221,18 @@ export async function POST(req: Request) {
     const parsed = await parseMemo(input, null);
     const nameCandidate = parsed.name?.trim();
 
+    // Block ambiguous fallbacks from creating orphan persons
+    if (!nameCandidate || nameCandidate === "알 수 없음") {
+      return NextResponse.json(
+        {
+          error: "no_name",
+          message:
+            "누구에 대한 메모인지 알 수 없었어요. 이름이나 호칭(장인어른, 엄마 등)을 함께 써주세요.",
+        },
+        { status: 400 }
+      );
+    }
+
     let existing: DbPerson | null = null;
 
     if (!forceCreate && nameCandidate) {

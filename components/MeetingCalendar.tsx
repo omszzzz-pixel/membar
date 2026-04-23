@@ -8,6 +8,7 @@ type Props = {
   history?: HistoryEntry[];
   onAddToday: () => void;
   onRemoveMeeting?: (date: string) => void;
+  onRemoveMemo?: (id: string) => void;
 };
 
 type ActivityItem =
@@ -22,6 +23,7 @@ type ActivityItem =
   | {
       key: string;
       kind: "memo";
+      id: string;
       date: string;
       time: string;
       sortKey: string;
@@ -39,6 +41,7 @@ export default function MeetingCalendar({
   history = [],
   onAddToday,
   onRemoveMeeting,
+  onRemoveMemo,
 }: Props) {
   const today = new Date();
   const todayKey = ymd(today.getFullYear(), today.getMonth(), today.getDate());
@@ -86,6 +89,7 @@ export default function MeetingCalendar({
         items.push({
           key: `h-${h.id}`,
           kind: "memo",
+          id: h.id,
           date: ds,
           time: h.created_at.slice(11, 16),
           sortKey: h.created_at,
@@ -291,6 +295,30 @@ export default function MeetingCalendar({
                 <button
                   onClick={() => onRemoveMeeting(it.date)}
                   aria-label="만남 기록 삭제"
+                  className="shrink-0 self-start rounded-md p-1 text-paper/25 transition hover:bg-terra/10 hover:text-terra"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M6 6l12 12M18 6L6 18"
+                      stroke="currentColor"
+                      strokeWidth="1.75"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </button>
+              )}
+              {it.kind === "memo" && onRemoveMemo && (
+                <button
+                  onClick={() => {
+                    if (
+                      confirm(
+                        "이 메모를 삭제할까요?\n이미 반영된 정보(태그·관심사 등)는 그대로 남아있어요."
+                      )
+                    ) {
+                      onRemoveMemo(it.id);
+                    }
+                  }}
+                  aria-label="메모 삭제"
                   className="shrink-0 self-start rounded-md p-1 text-paper/25 transition hover:bg-terra/10 hover:text-terra"
                 >
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none">

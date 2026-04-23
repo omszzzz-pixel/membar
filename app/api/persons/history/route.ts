@@ -33,3 +33,35 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ history: data ?? [] });
 }
+
+export async function DELETE(req: Request) {
+  const url = new URL(req.url);
+  const id = url.searchParams.get("id");
+  const userId = url.searchParams.get("userId");
+  if (!id || !userId)
+    return NextResponse.json(
+      { error: "id and userId required" },
+      { status: 400 }
+    );
+
+  const sb = getServerSupabase();
+
+  // Verify ownership via join: history.person_id -> persons.user_id
+  const { data: row, error: lookupErr } = await sb
+    .from("history")
+    .select("id, persons!inner(user_id)")
+    .eq("id", id)
+    .eq("persons.user_id", userId)
+    .maybeSingle();
+
+  if (lookupErr)
+    return NextResponse.json({ error: lookupErr.message }, { status: 500 });
+  if (!row)
+    return NextResponse.json({ error: "not found" }, { status: 404 });
+
+  const { error } = await sb.from("history").delete().eq("id", id);
+  if (error)
+    return NextResponse.json({ error: error.message }, { status: 500 });
+
+  return NextResponse.json({ ok: true });
+}

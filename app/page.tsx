@@ -11,6 +11,7 @@ import DisambigSheet, { type Candidate } from "@/components/DisambigSheet";
 import PaywallSheet from "@/components/PaywallSheet";
 import InstallBanner from "@/components/InstallBanner";
 import InstallToast from "@/components/InstallToast";
+import SaveToast from "@/components/SaveToast";
 import { useUsage } from "@/lib/useUsage";
 import {
   GUEST_HARD_LIMIT,
@@ -51,6 +52,10 @@ export default function Home() {
     candidates: Candidate[];
   } | null>(null);
   const [installToastOpen, setInstallToastOpen] = useState(false);
+  const [saveToast, setSaveToast] = useState<{
+    name: string;
+    kind: "new" | "updated";
+  } | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const { usage, refresh: refreshUsage } = useUsage(userId);
@@ -190,6 +195,13 @@ export default function Home() {
           );
           return;
         }
+        if (err === "no_name") {
+          setSubmitError(
+            (body as { message?: string })?.message ??
+              "누구에 대한 메모인지 알 수 없었어요. 이름이나 호칭(장인어른·엄마 등)을 함께 써주세요."
+          );
+          return;
+        }
         if (res.status >= 500) {
           setSubmitError("서버 오류. 잠시 후 다시 시도해주세요.");
           return;
@@ -199,6 +211,8 @@ export default function Home() {
       }
       const saved = (body as { person?: Person })?.person;
       if (saved) {
+        const wasExisting =
+          persons?.some((p) => p.id === saved.id) ?? false;
         setPersons((prev) => {
           if (!prev) return [saved];
           const idx = prev.findIndex((p) => p.id === saved.id);
@@ -209,19 +223,29 @@ export default function Home() {
           }
           return [saved, ...prev];
         });
+
+        // First-memo install nudge (once per browser). Otherwise show save toast.
+        let shouldShowInstall = false;
+        try {
+          if (!localStorage.getItem("membar_install_toast_shown")) {
+            localStorage.setItem("membar_install_toast_shown", "1");
+            shouldShowInstall = true;
+          }
+        } catch {
+          // ignore
+        }
+
+        if (shouldShowInstall) {
+          setInstallToastOpen(true);
+        } else {
+          setSaveToast({
+            name: saved.name,
+            kind: wasExisting ? "updated" : "new",
+          });
+        }
       }
       setMode({ kind: "closed" });
       void refreshUsage();
-
-      // First-memo install nudge (once per browser)
-      try {
-        if (saved && !localStorage.getItem("membar_install_toast_shown")) {
-          localStorage.setItem("membar_install_toast_shown", "1");
-          setInstallToastOpen(true);
-        }
-      } catch {
-        // ignore
-      }
     } catch (e) {
       clearTimeout(timeoutId);
       if ((e as Error)?.name === "AbortError") {
@@ -489,6 +513,14 @@ export default function Home() {
 
       {installToastOpen && (
         <InstallToast onClose={() => setInstallToastOpen(false)} />
+      )}
+
+      {saveToast && (
+        <SaveToast
+          name={saveToast.name}
+          kind={saveToast.kind}
+          onClose={() => setSaveToast(null)}
+        />
       )}
 
       {timelineOpen && (
