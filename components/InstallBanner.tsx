@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import IosInstallGuide from "./IosInstallGuide";
+import InstallGuide from "./InstallGuide";
 import { useInstall } from "@/lib/installContext";
 
 const SNOOZE_KEY = "membar_install_banner_snooze";
@@ -9,9 +9,9 @@ const MIN_VISITS = 3;
 const SNOOZE_DAYS = 10;
 
 export default function InstallBanner() {
-  const { canInstall, isIOS, isInstalled, visits, install } = useInstall();
+  const { canInstall, isInstalled, visits, install } = useInstall();
   const [snoozedUntil, setSnoozedUntil] = useState<number | null>(null);
-  const [iosGuideOpen, setIosGuideOpen] = useState(false);
+  const [guideOpen, setGuideOpen] = useState(false);
   const [hidden, setHidden] = useState(false);
 
   useEffect(() => {
@@ -26,9 +26,7 @@ export default function InstallBanner() {
 
   const now = Date.now();
   const snoozed = snoozedUntil !== null && now < snoozedUntil;
-  const eligible = !isInstalled && (canInstall || isIOS);
-  const shouldShow =
-    eligible && !snoozed && !hidden && visits >= MIN_VISITS;
+  const shouldShow = !isInstalled && !snoozed && !hidden && visits >= MIN_VISITS;
 
   if (!shouldShow) return null;
 
@@ -43,12 +41,14 @@ export default function InstallBanner() {
   };
 
   const handleInstall = async () => {
-    if (isIOS) {
-      setIosGuideOpen(true);
-      return;
+    if (canInstall) {
+      const ok = await install();
+      if (ok) {
+        setHidden(true);
+        return;
+      }
     }
-    const ok = await install();
-    if (ok) setHidden(true);
+    setGuideOpen(true);
   };
 
   return (
@@ -69,7 +69,7 @@ export default function InstallBanner() {
           onClick={handleInstall}
           className="shrink-0 rounded-md bg-gold px-3 py-1.5 text-[12.5px] font-semibold text-white transition hover:bg-gold-soft"
         >
-          {isIOS ? "방법 보기" : "설치"}
+          설치
         </button>
         <button
           onClick={dismiss}
@@ -86,9 +86,7 @@ export default function InstallBanner() {
           </svg>
         </button>
       </div>
-      {iosGuideOpen && (
-        <IosInstallGuide onClose={() => setIosGuideOpen(false)} />
-      )}
+      {guideOpen && <InstallGuide onClose={() => setGuideOpen(false)} />}
     </>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import IosInstallGuide from "./IosInstallGuide";
+import InstallGuide from "./InstallGuide";
 import { useInstall } from "@/lib/installContext";
 
 const AUTO_DISMISS_MS = 6500;
@@ -11,8 +11,8 @@ type Props = {
 };
 
 export default function InstallToast({ onClose }: Props) {
-  const { canInstall, isIOS, isInstalled, install } = useInstall();
-  const [iosGuideOpen, setIosGuideOpen] = useState(false);
+  const { canInstall, isInstalled, install } = useInstall();
+  const [guideOpen, setGuideOpen] = useState(false);
 
   useEffect(() => {
     const t = setTimeout(onClose, AUTO_DISMISS_MS);
@@ -20,15 +20,16 @@ export default function InstallToast({ onClose }: Props) {
   }, [onClose]);
 
   if (isInstalled) return null;
-  if (!canInstall && !isIOS) return null;
 
   const handleInstall = async () => {
-    if (isIOS) {
-      setIosGuideOpen(true);
-      return;
+    if (canInstall) {
+      const ok = await install();
+      if (ok) {
+        onClose();
+        return;
+      }
     }
-    const ok = await install();
-    if (ok) onClose();
+    setGuideOpen(true);
   };
 
   return (
@@ -50,7 +51,7 @@ export default function InstallToast({ onClose }: Props) {
             onClick={handleInstall}
             className="shrink-0 rounded-md bg-gold px-3 py-1.5 text-[12.5px] font-semibold text-white transition hover:bg-gold-soft"
           >
-            {isIOS ? "방법" : "설치"}
+            설치
           </button>
           <button
             onClick={onClose}
@@ -68,9 +69,7 @@ export default function InstallToast({ onClose }: Props) {
           </button>
         </div>
       </div>
-      {iosGuideOpen && (
-        <IosInstallGuide onClose={() => setIosGuideOpen(false)} />
-      )}
+      {guideOpen && <InstallGuide onClose={() => setGuideOpen(false)} />}
     </>
   );
 }
