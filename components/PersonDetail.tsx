@@ -133,6 +133,11 @@ export default function PersonDetail({
               <div className="truncate text-[20px] font-bold text-paper">
                 {person.name}
               </div>
+              {sample && (
+                <span className="shrink-0 rounded-md bg-gold/15 px-1.5 py-0.5 text-[10.5px] font-bold text-gold">
+                  예시
+                </span>
+              )}
               <button
                 onClick={toggleFavorite}
                 className={`shrink-0 text-[16px] transition ${
@@ -194,7 +199,7 @@ export default function PersonDetail({
         <div className="px-5 pt-3">
           <button
             onClick={() => setBriefingOpen(true)}
-            className="flex w-full items-center justify-between rounded-lg bg-gold/10 px-4 py-3 transition hover:bg-gold/14"
+            className="flex w-full items-center justify-between rounded-lg bg-gold px-4 py-2.5 text-white shadow-[0_6px_16px_-6px_rgba(255,111,15,0.55)] transition hover:bg-gold-soft"
           >
             <div className="flex items-center gap-2.5">
               <svg
@@ -202,7 +207,6 @@ export default function PersonDetail({
                 height="17"
                 viewBox="0 0 24 24"
                 fill="none"
-                className="text-gold"
               >
                 <path
                   d="M7 3h10l4 4v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"
@@ -217,22 +221,9 @@ export default function PersonDetail({
                   strokeLinecap="round"
                 />
               </svg>
-              <div className="text-left">
-                <div className="text-[14px] font-semibold text-gold">
-                  만남 전 브리핑
-                </div>
-                <div className="text-[12px] text-paper/55">
-                  AI가 히스토리 읽고 한 페이지로
-                </div>
-              </div>
+              <div className="text-[14px] font-bold">만남 전 브리핑</div>
             </div>
-            <svg
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              fill="none"
-              className="text-gold/70"
-            >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
               <path
                 d="M9 6l6 6-6 6"
                 stroke="currentColor"
@@ -243,13 +234,6 @@ export default function PersonDetail({
             </svg>
           </button>
         </div>
-
-        {sample && (
-          <div className="mx-5 mt-3 rounded-lg border border-gold/25 bg-gold/8 px-3.5 py-2.5 text-[13px] leading-relaxed text-paper/80">
-            <span className="font-semibold text-gold">예시</span> — 실제
-            데이터가 아닙니다. 이런 식으로 정리된다는 샘플이에요.
-          </div>
-        )}
 
         <div className="overflow-y-auto px-5 pb-6 pt-1 scrollbar-none">
           <Section title="프로필">
