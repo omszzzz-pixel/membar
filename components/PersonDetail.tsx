@@ -244,14 +244,14 @@ export default function PersonDetail({
           </button>
         </div>
 
-        {sample && (
-          <div className="mx-5 mt-3 rounded-lg border border-gold/25 bg-gold/8 px-3.5 py-2.5 text-[13px] leading-relaxed text-paper/80">
-            <span className="font-semibold text-gold">예시</span> — 실제
-            데이터가 아닙니다. 이런 식으로 정리된다는 샘플이에요.
-          </div>
-        )}
-
         <div className="overflow-y-auto px-5 pb-6 pt-1 scrollbar-none">
+          {sample && (
+            <div className="mt-3 rounded-lg border border-gold/25 bg-gold/8 px-3.5 py-2.5 text-[13px] leading-relaxed text-paper/80">
+              <span className="font-semibold text-gold">예시</span> — 실제
+              데이터가 아닙니다. 이런 식으로 정리된다는 샘플이에요.
+            </div>
+          )}
+
           <Section title="프로필">
             <KV label="직함" value={person.title} />
             <KV label="회사" value={person.company} />
