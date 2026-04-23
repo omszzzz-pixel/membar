@@ -31,7 +31,6 @@ export default function PersonDetail({
   const [history, setHistory] = useState<HistoryEntry[] | null>(null);
   const [briefingOpen, setBriefingOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const sample = isSample(person.id);
 
   const loadHistory = useCallback(async () => {
@@ -246,29 +245,13 @@ export default function PersonDetail({
         </div>
 
         {sample && (
-          <div
-            className="overflow-hidden transition-all duration-300 ease-out"
-            style={{
-              maxHeight: scrolled ? 0 : 160,
-              opacity: scrolled ? 0 : 1,
-              marginTop: scrolled ? 0 : 12,
-            }}
-            aria-hidden={scrolled}
-          >
-            <div className="mx-5 rounded-lg border border-gold/25 bg-gold/8 px-3.5 py-2.5 text-[13px] leading-relaxed text-paper/80">
-              <span className="font-semibold text-gold">예시</span> — 실제
-              데이터가 아닙니다. 이런 식으로 정리된다는 샘플이에요.
-            </div>
+          <div className="mx-5 mt-3 rounded-lg border border-gold/25 bg-gold/8 px-3.5 py-2.5 text-[13px] leading-relaxed text-paper/80">
+            <span className="font-semibold text-gold">예시</span> — 실제
+            데이터가 아닙니다. 이런 식으로 정리된다는 샘플이에요.
           </div>
         )}
 
-        <div
-          onScroll={(e) => {
-            const top = (e.currentTarget as HTMLDivElement).scrollTop;
-            setScrolled(top > 16);
-          }}
-          className="min-h-0 flex-1 overflow-y-auto px-5 pb-6 pt-1 scrollbar-none"
-        >
+        <div className="overflow-y-auto px-5 pb-6 pt-1 scrollbar-none">
           <Section title="프로필">
             <KV label="직함" value={person.title} />
             <KV label="회사" value={person.company} />
