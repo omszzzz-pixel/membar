@@ -92,13 +92,8 @@ export default function BriefingSheet({ person, history, onClose }: Props) {
   }, [generate]);
 
   return (
-    <div
-      className="anim-fade-in fixed inset-0 z-[60] bg-black/75 backdrop-blur-sm"
-      onMouseDown={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-    >
-      <div className="anim-sheet-up absolute inset-x-0 bottom-0 mx-auto flex max-h-[92dvh] w-full max-w-[430px] flex-col overflow-hidden rounded-t-2xl bg-surface">
+    <div className="anim-fade-in fixed inset-0 z-[60] bg-ink">
+      <div className="anim-sheet-up mx-auto flex h-dvh w-full max-w-[430px] flex-col overflow-hidden bg-surface">
         <div className="flex items-center gap-3 px-5 pt-5 pb-4">
           <Avatar name={person.name} size="md" />
           <div className="min-w-0 flex-1">
