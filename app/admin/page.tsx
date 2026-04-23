@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getBrowserSupabase } from "@/lib/supabase";
-import { useUser } from "@/lib/userContext";
 
 type Stats = {
   totalUsers: number;
@@ -43,40 +41,20 @@ type Dashboard = {
 };
 
 export default function AdminPage() {
-  const { authed, email, loading: userLoading } = useUser();
   const [data, setData] = useState<Dashboard | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (userLoading) return;
-    if (!authed) {
-      setError("로그인이 필요합니다");
-      return;
-    }
     void load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authed, userLoading]);
+  }, []);
 
   const load = async () => {
     setLoading(true);
     setError(null);
     try {
-      const sb = getBrowserSupabase();
-      const { data: session } = await sb.auth.getSession();
-      const token = session.session?.access_token;
-      if (!token) {
-        setError("세션이 만료되었어요. 다시 로그인해주세요.");
-        return;
-      }
-      const res = await fetch("/api/admin/dashboard", {
-        headers: { authorization: `Bearer ${token}` },
-        cache: "no-store",
-      });
-      if (res.status === 403) {
-        setError("관리자 권한이 없습니다");
-        return;
-      }
+      const res = await fetch("/api/admin/dashboard", { cache: "no-store" });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         setError(body?.error ?? "불러오기 실패");
@@ -90,24 +68,17 @@ export default function AdminPage() {
     }
   };
 
-  if (userLoading) {
-    return (
-      <main className="min-h-dvh px-4 pt-12 text-center text-paper/50">
-        확인 중…
-      </main>
-    );
-  }
-
   if (error) {
     return (
       <main className="min-h-dvh px-4 pt-12 text-center">
-        <div className="text-[16px] font-bold text-paper">접근 불가</div>
+        <div className="text-[16px] font-bold text-paper">불러오기 실패</div>
         <div className="mt-2 text-[13.5px] text-paper/60">{error}</div>
-        {email && (
-          <div className="mt-1 text-[12px] text-paper/40">
-            현재 로그인: {email}
-          </div>
-        )}
+        <button
+          onClick={load}
+          className="mt-4 rounded-md bg-paper/6 px-4 py-2 text-[13px] font-semibold text-paper/75 hover:bg-paper/10"
+        >
+          다시 시도
+        </button>
       </main>
     );
   }
@@ -142,6 +113,12 @@ export default function AdminPage() {
       </header>
 
       <div className="px-4 pt-4">
+        <div className="mb-4 rounded-lg border border-terra/30 bg-terra/8 px-3.5 py-2.5 text-[12.5px] leading-relaxed text-terra">
+          <span className="font-semibold">⚠️ 권한 체크 꺼져 있음</span> — 현재
+          누구나 이 페이지를 열 수 있어요. 로그인 기능 붙이면 자동 보호되게
+          다시 켤 예정.
+        </div>
+
         {/* Stats cards */}
         <Section title="개요">
           <div className="grid grid-cols-3 gap-2">
