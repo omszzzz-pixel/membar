@@ -100,7 +100,7 @@ export default function RefundPage() {
       <H2>6. 환불 신청 방법</H2>
       <UL>
         <li>
-          이메일: {"{{CONTACT_EMAIL}}"}
+          이메일: {"titan@titan-enterprise.co.kr"}
           {" "}
           — 환불 요청 시 가입 이메일, 결제 일시, 환불 사유를 함께 기재해
           주세요.

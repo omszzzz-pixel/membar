@@ -8,7 +8,7 @@ export default function PrivacyPage() {
   return (
     <LegalPage title="개인정보 처리방침" lastUpdated="2026-04-24">
       <P>
-        {"{{COMPANY_NAME}}"}(이하 &ldquo;회사&rdquo;)는 membar(이하
+        {"타이탄엔터프라이즈"}(이하 &ldquo;회사&rdquo;)는 membar(이하
         &ldquo;서비스&rdquo;) 이용자의 개인정보를 소중히 다루며, 개인정보
         보호법 등 관련 법령을 준수합니다. 본 처리방침은 회사가 이용자의
         개인정보를 어떻게 수집·이용·보관·파기하는지 안내합니다.
@@ -223,9 +223,9 @@ export default function PrivacyPage() {
 
       <H2>13. 개인정보 보호책임자</H2>
       <UL>
-        <li>성명: {"{{CEO_NAME}}"}</li>
+        <li>성명: {"오민식"}</li>
         <li>직책: 대표자 / 개인정보 보호책임자</li>
-        <li>이메일: {"{{CONTACT_EMAIL}}"}</li>
+        <li>이메일: {"titan@titan-enterprise.co.kr"}</li>
       </UL>
       <P>
         개인정보 관련 문의·불만·피해구제는 위 연락처로 요청하실 수 있으며,

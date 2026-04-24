@@ -9,7 +9,7 @@ export default function TermsPage() {
     <LegalPage title="이용약관" lastUpdated="2026-04-24">
       <H2>제1조 (목적)</H2>
       <P>
-        본 약관은 {"{{COMPANY_NAME}}"}(이하 &ldquo;회사&rdquo;)가 제공하는
+        본 약관은 {"타이탄엔터프라이즈"}(이하 &ldquo;회사&rdquo;)가 제공하는
         membar(이하 &ldquo;서비스&rdquo;)의 이용과 관련하여 회사와 이용자의
         권리·의무 및 책임사항, 기타 필요한 사항을 규정함을 목적으로 합니다.
       </P>
