@@ -36,8 +36,6 @@ export default function BriefingSheet({ person, history, onClose }: Props) {
     if (isSample(person.id)) {
       const sampleBriefing = SAMPLE_BRIEFINGS[person.id];
       if (sampleBriefing) {
-        // Small delay to show the loading animation briefly — feels natural.
-        await new Promise((r) => setTimeout(r, 900));
         setBriefing(sampleBriefing);
         setLoading(false);
         return;
