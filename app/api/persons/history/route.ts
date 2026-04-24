@@ -1,17 +1,20 @@
 import { NextResponse } from "next/server";
 import { getServerSupabase } from "@/lib/supabase";
+import { resolveUserId } from "@/lib/authGuard";
 
 export const runtime = "nodejs";
 
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const personId = url.searchParams.get("personId");
-  const userId = url.searchParams.get("userId");
-  if (!personId || !userId)
-    return NextResponse.json(
-      { error: "personId and userId required" },
-      { status: 400 }
-    );
+  const bodyUserId = url.searchParams.get("userId");
+  if (!personId)
+    return NextResponse.json({ error: "personId required" }, { status: 400 });
+
+  const resolved = await resolveUserId(req, bodyUserId);
+  if ("error" in resolved)
+    return NextResponse.json({ error: resolved.error }, { status: 401 });
+  const userId = resolved.userId;
 
   const sb = getServerSupabase();
   const { data: person, error: pErr } = await sb
@@ -37,12 +40,14 @@ export async function GET(req: Request) {
 export async function DELETE(req: Request) {
   const url = new URL(req.url);
   const id = url.searchParams.get("id");
-  const userId = url.searchParams.get("userId");
-  if (!id || !userId)
-    return NextResponse.json(
-      { error: "id and userId required" },
-      { status: 400 }
-    );
+  const bodyUserId = url.searchParams.get("userId");
+  if (!id)
+    return NextResponse.json({ error: "id required" }, { status: 400 });
+
+  const resolved = await resolveUserId(req, bodyUserId);
+  if ("error" in resolved)
+    return NextResponse.json({ error: resolved.error }, { status: 401 });
+  const userId = resolved.userId;
 
   const sb = getServerSupabase();
 

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import type { Usage } from "./types";
+import { apiFetch } from "./apiFetch";
 
 export function useUsage(userId: string) {
   const [usage, setUsage] = useState<Usage>({ persons: 0, memos: 0 });
@@ -10,7 +11,7 @@ export function useUsage(userId: string) {
   const refresh = useCallback(async () => {
     if (!userId) return;
     try {
-      const res = await fetch(
+      const res = await apiFetch(
         `/api/usage?userId=${encodeURIComponent(userId)}`,
         { cache: "no-store" }
       );

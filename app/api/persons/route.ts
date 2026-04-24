@@ -3,6 +3,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { getServerSupabase } from "@/lib/supabase";
 import { parseMemo } from "@/lib/parseMemo";
 import { notifyAsync, fmtText } from "@/lib/telegram";
+import { resolveUserId } from "@/lib/authGuard";
 import {
   FREE_LIMIT,
   MONTHLY_MEMO_LIMIT,
@@ -184,9 +185,11 @@ async function memosThisMonth(
 
 export async function GET(req: Request) {
   const url = new URL(req.url);
-  const userId = url.searchParams.get("userId");
-  if (!userId)
-    return NextResponse.json({ error: "userId required" }, { status: 400 });
+  const bodyUserId = url.searchParams.get("userId");
+  const resolved = await resolveUserId(req, bodyUserId);
+  if ("error" in resolved)
+    return NextResponse.json({ error: resolved.error }, { status: 401 });
+  const userId = resolved.userId;
   const sb = getServerSupabase();
   const { data, error } = await sb
     .from("persons")
@@ -200,16 +203,18 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    const { userId, input, forceCreate } = (await req.json()) as {
+    const { userId: bodyUserId, input, forceCreate } = (await req.json()) as {
       userId?: string;
       input?: string;
       forceCreate?: boolean;
     };
-    if (!userId || !input)
-      return NextResponse.json(
-        { error: "userId and input required" },
-        { status: 400 }
-      );
+    if (!input)
+      return NextResponse.json({ error: "input required" }, { status: 400 });
+
+    const resolved = await resolveUserId(req, bodyUserId);
+    if ("error" in resolved)
+      return NextResponse.json({ error: resolved.error }, { status: 401 });
+    const userId = resolved.userId;
 
     const sb = getServerSupabase();
 
@@ -357,17 +362,19 @@ export async function POST(req: Request) {
 
 export async function PATCH(req: Request) {
   try {
-    const { userId, input, id, patch } = (await req.json()) as {
+    const { userId: bodyUserId, input, id, patch } = (await req.json()) as {
       userId?: string;
       input?: string;
       id?: string;
       patch?: Partial<DbPerson>;
     };
-    if (!userId || !id)
-      return NextResponse.json(
-        { error: "userId and id required" },
-        { status: 400 }
-      );
+    if (!id)
+      return NextResponse.json({ error: "id required" }, { status: 400 });
+
+    const resolved = await resolveUserId(req, bodyUserId);
+    if ("error" in resolved)
+      return NextResponse.json({ error: resolved.error }, { status: 401 });
+    const userId = resolved.userId;
 
     const sb = getServerSupabase();
 
@@ -467,13 +474,16 @@ export async function PATCH(req: Request) {
 
 export async function DELETE(req: Request) {
   const url = new URL(req.url);
-  const userId = url.searchParams.get("userId");
+  const bodyUserId = url.searchParams.get("userId");
   const id = url.searchParams.get("id");
-  if (!userId || !id)
-    return NextResponse.json(
-      { error: "userId and id required" },
-      { status: 400 }
-    );
+  if (!id)
+    return NextResponse.json({ error: "id required" }, { status: 400 });
+
+  const resolved = await resolveUserId(req, bodyUserId);
+  if ("error" in resolved)
+    return NextResponse.json({ error: resolved.error }, { status: 401 });
+  const userId = resolved.userId;
+
   const sb = getServerSupabase();
   const { error } = await sb
     .from("persons")

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getServerSupabase } from "@/lib/supabase";
+import { resolveUserId } from "@/lib/authGuard";
 
 export const runtime = "nodejs";
 
@@ -12,10 +13,12 @@ function startOfMonthUtc(): string {
 
 export async function GET(req: Request) {
   const url = new URL(req.url);
-  const userId = url.searchParams.get("userId");
-  if (!userId) {
-    return NextResponse.json({ error: "userId required" }, { status: 400 });
-  }
+  const bodyUserId = url.searchParams.get("userId");
+
+  const resolved = await resolveUserId(req, bodyUserId);
+  if ("error" in resolved)
+    return NextResponse.json({ error: resolved.error }, { status: 401 });
+  const userId = resolved.userId;
 
   const sb = getServerSupabase();
 

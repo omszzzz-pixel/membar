@@ -7,6 +7,7 @@ import SignInSheet from "@/components/SignInSheet";
 import PaywallSheet from "@/components/PaywallSheet";
 import InstallButton from "@/components/InstallButton";
 import FeedbackBox from "@/components/FeedbackBox";
+import { apiFetch } from "@/lib/apiFetch";
 import { useUser } from "@/lib/userContext";
 import { useUsage } from "@/lib/useUsage";
 import {
@@ -26,7 +27,7 @@ export default function MePage() {
   useEffect(() => {
     if (!userId) return;
     (async () => {
-      const res = await fetch(
+      const res = await apiFetch(
         `/api/persons?userId=${encodeURIComponent(userId)}`,
         { cache: "no-store" }
       );

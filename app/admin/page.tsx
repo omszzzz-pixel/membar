@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { getBrowserSupabase } from "@/lib/supabase";
+import { useUser } from "@/lib/userContext";
 
 type Stats = {
   totalUsers: number;
@@ -41,20 +43,39 @@ type Dashboard = {
 };
 
 export default function AdminPage() {
+  const { authed, email, signInWithKakao, loading: userLoading } = useUser();
   const [data, setData] = useState<Dashboard | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [forbidden, setForbidden] = useState(false);
 
   useEffect(() => {
+    if (userLoading) return;
+    if (!authed) return; // show login CTA, don't try fetching
     void load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [userLoading, authed]);
 
   const load = async () => {
     setLoading(true);
     setError(null);
+    setForbidden(false);
     try {
-      const res = await fetch("/api/admin/dashboard", { cache: "no-store" });
+      const sb = getBrowserSupabase();
+      const { data: sessionData } = await sb.auth.getSession();
+      const token = sessionData.session?.access_token;
+      if (!token) {
+        setForbidden(true);
+        return;
+      }
+      const res = await fetch("/api/admin/dashboard", {
+        cache: "no-store",
+        headers: { authorization: `Bearer ${token}` },
+      });
+      if (res.status === 403) {
+        setForbidden(true);
+        return;
+      }
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         setError(body?.error ?? "불러오기 실패");
@@ -67,6 +88,37 @@ export default function AdminPage() {
       setLoading(false);
     }
   };
+
+  if (!userLoading && !authed) {
+    return (
+      <main className="min-h-dvh px-4 pt-16 text-center">
+        <div className="text-[18px] font-bold text-paper">관리자 전용</div>
+        <div className="mt-2 text-[13.5px] text-paper/60">
+          로그인이 필요해요.
+        </div>
+        <button
+          onClick={signInWithKakao}
+          className="mt-5 rounded-lg bg-gold px-4 py-2.5 text-[14px] font-semibold text-white hover:bg-gold-soft"
+        >
+          카카오로 로그인
+        </button>
+      </main>
+    );
+  }
+
+  if (forbidden) {
+    return (
+      <main className="min-h-dvh px-4 pt-16 text-center">
+        <div className="text-[18px] font-bold text-paper">접근 권한 없음</div>
+        <div className="mt-2 text-[13.5px] text-paper/60">
+          {email ?? "현재 계정"}은 관리자로 등록되어 있지 않아요.
+        </div>
+        <div className="mt-3 text-[12px] text-paper/40">
+          ADMIN_EMAILS 환경변수에 이메일이 포함돼 있어야 해요.
+        </div>
+      </main>
+    );
+  }
 
   if (error) {
     return (
@@ -113,12 +165,6 @@ export default function AdminPage() {
       </header>
 
       <div className="px-4 pt-4">
-        <div className="mb-4 rounded-lg border border-terra/30 bg-terra/8 px-3.5 py-2.5 text-[12.5px] leading-relaxed text-terra">
-          <span className="font-semibold">⚠️ 권한 체크 꺼져 있음</span> — 현재
-          누구나 이 페이지를 열 수 있어요. 로그인 기능 붙이면 자동 보호되게
-          다시 켤 예정.
-        </div>
-
         {/* Stats cards */}
         <Section title="개요">
           <div className="grid grid-cols-3 gap-2">

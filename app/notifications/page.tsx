@@ -7,6 +7,7 @@ import BriefingSheet from "@/components/BriefingSheet";
 import { useUser } from "@/lib/userContext";
 import { STALE_DAYS, type HistoryEntry, type Person, type Todo } from "@/lib/types";
 import { SAMPLE_HISTORY, SAMPLE_PERSONS, isSample } from "@/lib/sampleData";
+import { apiFetch } from "@/lib/apiFetch";
 
 const TODAY_MEETING_WINDOW_DAYS = 1;
 const THIS_WEEK_WINDOW_DAYS = 7;
@@ -83,7 +84,7 @@ export default function NotificationsPage() {
   useEffect(() => {
     if (!userId) return;
     (async () => {
-      const res = await fetch(
+      const res = await apiFetch(
         `/api/persons?userId=${encodeURIComponent(userId)}`,
         { cache: "no-store" }
       );
@@ -193,7 +194,7 @@ export default function NotificationsPage() {
           return;
         }
         try {
-          const res = await fetch(
+          const res = await apiFetch(
             `/api/persons/history?personId=${n.person.id}&userId=${encodeURIComponent(userId)}`,
             { cache: "no-store" }
           );

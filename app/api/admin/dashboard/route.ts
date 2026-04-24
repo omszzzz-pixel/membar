@@ -1,10 +1,8 @@
 import { NextResponse } from "next/server";
 import { getServerSupabase } from "@/lib/supabase";
+import { getAdminFromRequest } from "@/lib/isAdmin";
 
 export const runtime = "nodejs";
-
-// TODO: re-enable admin guard once auth is in place.
-// import { getAdminFromRequest } from "@/lib/isAdmin";
 
 type ActivityRow = {
   id: string;
@@ -36,8 +34,11 @@ function startOfMonthUtc(): string {
   return d.toISOString();
 }
 
-export async function GET(_req: Request) {
-  // Auth guard temporarily disabled — re-enable once login is set up.
+export async function GET(req: Request) {
+  const admin = await getAdminFromRequest(req);
+  if (!admin) {
+    return NextResponse.json({ error: "forbidden" }, { status: 403 });
+  }
   const sb = getServerSupabase();
 
   // --- Stats ---

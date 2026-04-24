@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { TimelineItem } from "@/lib/types";
 import { useLockBodyScroll } from "@/lib/useLockBodyScroll";
 import { getSampleTimelineItems } from "@/lib/sampleData";
+import { apiFetch } from "@/lib/apiFetch";
 
 type Props = {
   userId: string;
@@ -53,7 +54,7 @@ export default function TimelineSheet({
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch(
+        const res = await apiFetch(
           `/api/timeline?userId=${encodeURIComponent(userId)}`,
           { cache: "no-store" }
         );

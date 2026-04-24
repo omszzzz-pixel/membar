@@ -6,6 +6,7 @@ import PersonDetail from "@/components/PersonDetail";
 import { useUser } from "@/lib/userContext";
 import { STALE_DAYS, type Person } from "@/lib/types";
 import { SAMPLE_PERSONS } from "@/lib/sampleData";
+import { apiFetch } from "@/lib/apiFetch";
 
 type UpcomingMeeting = {
   person: Person;
@@ -29,7 +30,7 @@ export default function SchedulePage() {
   useEffect(() => {
     if (!userId) return;
     (async () => {
-      const res = await fetch(
+      const res = await apiFetch(
         `/api/persons?userId=${encodeURIComponent(userId)}`,
         { cache: "no-store" }
       );

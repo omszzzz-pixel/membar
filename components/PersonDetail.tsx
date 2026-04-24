@@ -9,6 +9,7 @@ import type { HistoryEntry, Meeting, Person, Todo } from "@/lib/types";
 import { SAMPLE_HISTORY, isSample } from "@/lib/sampleData";
 import { formatShareText } from "@/lib/shareText";
 import { useLockBodyScroll } from "@/lib/useLockBodyScroll";
+import { apiFetch } from "@/lib/apiFetch";
 
 type Props = {
   person: Person;
@@ -37,7 +38,7 @@ export default function PersonDetail({
 
   const loadHistory = useCallback(async () => {
     try {
-      const res = await fetch(
+      const res = await apiFetch(
         `/api/persons/history?personId=${person.id}&userId=${encodeURIComponent(
           userId
         )}`,
@@ -65,7 +66,7 @@ export default function PersonDetail({
       onUpdate({ ...person, ...(body as Partial<Person>) });
       return;
     }
-    const res = await fetch("/api/persons", {
+    const res = await apiFetch("/api/persons", {
       method: "PATCH",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ userId, id: person.id, patch: body }),
@@ -108,7 +109,7 @@ export default function PersonDetail({
     // Optimistic remove
     setHistory((prev) => (prev ?? []).filter((h) => h.id !== memoId));
     try {
-      await fetch(
+      await apiFetch(
         `/api/persons/history?id=${memoId}&userId=${encodeURIComponent(userId)}`,
         { method: "DELETE" }
       );

@@ -6,6 +6,7 @@ import type { Briefing, HistoryEntry, Person } from "@/lib/types";
 import { useLockBodyScroll } from "@/lib/useLockBodyScroll";
 import { useRotatingText } from "@/lib/useRotatingText";
 import { SAMPLE_BRIEFINGS, isSample } from "@/lib/sampleData";
+import { apiFetch } from "@/lib/apiFetch";
 
 const BRIEFING_STEPS = [
   "히스토리 읽는 중…",
@@ -46,7 +47,7 @@ export default function BriefingSheet({ person, history, onClose }: Props) {
     const timeoutId = setTimeout(() => controller.abort(), 55_000);
 
     try {
-      const res = await fetch("/api/briefing", {
+      const res = await apiFetch("/api/briefing", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ person, history }),

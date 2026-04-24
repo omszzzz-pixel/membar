@@ -13,6 +13,7 @@ import InstallBanner from "@/components/InstallBanner";
 import InstallToast from "@/components/InstallToast";
 import SaveToast from "@/components/SaveToast";
 import { useUsage } from "@/lib/useUsage";
+import { apiFetch } from "@/lib/apiFetch";
 import {
   GUEST_HARD_LIMIT,
   GUEST_MEDIUM_NUDGE,
@@ -62,7 +63,7 @@ export default function Home() {
 
   const refresh = useCallback(async () => {
     if (!userId) return;
-    const res = await fetch(
+    const res = await apiFetch(
       `/api/persons?userId=${encodeURIComponent(userId)}`,
       { cache: "no-store" }
     );
@@ -154,7 +155,7 @@ export default function Home() {
     const timeoutId = setTimeout(() => controller.abort(), 55_000);
 
     try {
-      const res = await fetch("/api/persons", {
+      const res = await apiFetch("/api/persons", {
         method: editingId ? "PATCH" : "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ userId, input, id: editingId, forceCreate }),
@@ -280,7 +281,7 @@ export default function Home() {
     if (!confirm("이 사람을 삭제할까요?")) return;
     setPersons((prev) => prev?.filter((p) => p.id !== id) ?? prev);
     setMode({ kind: "closed" });
-    void fetch(
+    void apiFetch(
       `/api/persons?userId=${encodeURIComponent(userId)}&id=${id}`,
       { method: "DELETE" }
     );
