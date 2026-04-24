@@ -9,9 +9,6 @@ import SignInSheet from "@/components/SignInSheet";
 import TimelineSheet from "@/components/TimelineSheet";
 import DisambigSheet, { type Candidate } from "@/components/DisambigSheet";
 import PaywallSheet from "@/components/PaywallSheet";
-import InstallBanner from "@/components/InstallBanner";
-import InAppBrowserNotice from "@/components/InAppBrowserNotice";
-import InstallToast from "@/components/InstallToast";
 import SaveToast from "@/components/SaveToast";
 import { useUsage } from "@/lib/useUsage";
 import { apiFetch } from "@/lib/apiFetch";
@@ -53,7 +50,6 @@ export default function Home() {
     parsedName: string;
     candidates: Candidate[];
   } | null>(null);
-  const [installToastOpen, setInstallToastOpen] = useState(false);
   const [saveToast, setSaveToast] = useState<{
     name: string;
     kind: "new" | "updated";
@@ -241,25 +237,10 @@ export default function Home() {
           return [saved, ...prev];
         });
 
-        // First-memo install nudge (once per browser). Otherwise show save toast.
-        let shouldShowInstall = false;
-        try {
-          if (!localStorage.getItem("membar_install_toast_shown")) {
-            localStorage.setItem("membar_install_toast_shown", "1");
-            shouldShowInstall = true;
-          }
-        } catch {
-          // ignore
-        }
-
-        if (shouldShowInstall) {
-          setInstallToastOpen(true);
-        } else {
-          setSaveToast({
-            name: saved.name,
-            kind: wasExisting ? "updated" : "new",
-          });
-        }
+        setSaveToast({
+          name: saved.name,
+          kind: wasExisting ? "updated" : "new",
+        });
       }
       setMode({ kind: "closed" });
       void refreshUsage();
@@ -305,8 +286,6 @@ export default function Home() {
 
   return (
     <main className="relative min-h-dvh">
-      <InAppBrowserNotice />
-      <InstallBanner />
       <header className="sticky top-0 z-10 border-b border-paper/8 bg-ink px-4 pb-3 pt-4">
         <div className="flex items-center justify-between">
           <div className="flex items-baseline gap-2">
@@ -589,10 +568,6 @@ export default function Home() {
 
       {paywall && (
         <PaywallSheet reason={paywall} onClose={() => setPaywall(null)} />
-      )}
-
-      {installToastOpen && (
-        <InstallToast onClose={() => setInstallToastOpen(false)} />
       )}
 
       {saveToast && (
