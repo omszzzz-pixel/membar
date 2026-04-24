@@ -76,6 +76,19 @@ export default function Home() {
     if (userId) void refresh();
   }, [userId, refresh]);
 
+  // 첫 방문이고 등록된 인맥이 0명이면 메모 등록 모달 자동 오픈
+  useEffect(() => {
+    if (!persons) return; // 로딩 중
+    if (persons.length > 0) return; // 이미 인맥 있음
+    try {
+      if (localStorage.getItem("membar_welcome_modal_shown")) return;
+      localStorage.setItem("membar_welcome_modal_shown", "1");
+      setMode({ kind: "create" });
+    } catch {
+      // localStorage 접근 실패 시 무시
+    }
+  }, [persons]);
+
   const filteredSorted = useMemo(() => {
     if (!persons) return [];
     const q = query.trim().toLowerCase();
@@ -484,7 +497,7 @@ export default function Home() {
 
       {mode.kind === "create" && (
         <InputModal
-          title="메모 등록"
+          title="이름이랑 떠오르는 걸 그냥 쓰세요"
           placeholder="누구 이름이랑 떠오르는 거 막 쳐요"
           examples={CREATE_EXAMPLES}
           memosUsed={memosUsed}
