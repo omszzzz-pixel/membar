@@ -76,17 +76,17 @@ export default function Home() {
     if (userId) void refresh();
   }, [userId, refresh]);
 
-  // 첫 방문이고 등록된 인맥이 0명이면 메모 등록 모달 자동 오픈
+  // 등록된 인맥이 0명이면 진입 즉시 메모 등록 모달 오픈.
+  // 같은 세션에서 한 번 닫으면 다시는 안 뜨지만, 새 세션에선 다시 유도.
   useEffect(() => {
     if (!persons) return; // 로딩 중
     if (persons.length > 0) return; // 이미 인맥 있음
     try {
-      if (localStorage.getItem("membar_welcome_modal_shown")) return;
-      localStorage.setItem("membar_welcome_modal_shown", "1");
-      setMode({ kind: "create" });
+      if (sessionStorage.getItem("membar_welcome_dismissed")) return;
     } catch {
-      // localStorage 접근 실패 시 무시
+      // sessionStorage 접근 실패 시 그냥 오픈
     }
+    setMode((prev) => (prev.kind === "closed" ? { kind: "create" } : prev));
   }, [persons]);
 
   const filteredSorted = useMemo(() => {
@@ -507,6 +507,11 @@ export default function Home() {
           onClose={() => {
             setSubmitError(null);
             setMode({ kind: "closed" });
+            try {
+              sessionStorage.setItem("membar_welcome_dismissed", "1");
+            } catch {
+              // 무시
+            }
           }}
           onSubmit={(text) => handleSubmit(text)}
           submitting={submitting}
