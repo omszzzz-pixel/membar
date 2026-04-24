@@ -617,8 +617,14 @@ export default function Home() {
         />
       )}
 
-      {/* 항상 떠있는 메모 등록 FAB (하단바 위) */}
-      {mode.kind === "closed" && !timelineOpen && !paywall && !signInOpen && (
+      {/* 항상 떠있는 메모 등록 FAB (하단바 위).
+          아직 인맥이 0명일 땐 EmptyHint의 '첫 메모 등록하기'와 중복되므로 숨김. */}
+      {mode.kind === "closed" &&
+        !timelineOpen &&
+        !paywall &&
+        !signInOpen &&
+        persons &&
+        persons.length > 0 && (
         <div
           className="pointer-events-none fixed inset-x-0 z-20 mx-auto flex max-w-[430px] justify-center px-4"
           style={{
