@@ -155,7 +155,10 @@ export async function parseMemo(
   if (!apiKey) throw new Error("ANTHROPIC_API_KEY not set");
 
   const client = new Anthropic({ apiKey, maxRetries: 3 });
-  const model = process.env.ANTHROPIC_MODEL || "claude-opus-4-7";
+  const model =
+    process.env.ANTHROPIC_PARSE_MODEL ||
+    process.env.ANTHROPIC_MODEL ||
+    "claude-haiku-4-5";
 
   const existingSummary = existing
     ? JSON.stringify({

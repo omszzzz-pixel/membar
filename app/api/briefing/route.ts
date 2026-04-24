@@ -75,7 +75,10 @@ export async function POST(req: Request) {
     }
 
     const client = new Anthropic({ apiKey });
-    const model = process.env.ANTHROPIC_MODEL || "claude-opus-4-7";
+    const model =
+      process.env.ANTHROPIC_BRIEFING_MODEL ||
+      process.env.ANTHROPIC_MODEL ||
+      "claude-sonnet-4-6";
 
     const personSummary = JSON.stringify({
       name: body.person.name,

@@ -99,6 +99,11 @@ export default function MePage() {
           </div>
         </div>
 
+        {/* Feedback — 최상단 노출 */}
+        <Section title="개발자에게 바란다">
+          <FeedbackBox />
+        </Section>
+
         {/* Stats */}
         <Section title="내 인맥 현황">
           <div className="grid grid-cols-3 gap-2">
@@ -216,11 +221,6 @@ export default function MePage() {
               </>
             )}
           </div>
-        </Section>
-
-        {/* Feedback */}
-        <Section title="개발자에게 바란다">
-          <FeedbackBox />
         </Section>
 
         <div className="mt-8 text-center text-[11.5px] text-paper/35">
