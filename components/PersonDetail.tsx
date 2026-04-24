@@ -405,7 +405,7 @@ export default function PersonDetail({
             onClick={sample ? (onCreateMemo ?? onClose) : onEdit}
             className="flex-1 rounded-lg bg-gold py-3 text-[14.5px] font-semibold text-white transition hover:bg-gold-soft"
           >
-            {sample ? "내 인맥 추가하기" : "막 치면 AI가 반영"}
+            {sample ? "닫고 직접 추가하기" : "막 치면 AI가 반영"}
           </button>
         </div>
       </div>
