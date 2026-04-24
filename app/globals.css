@@ -51,6 +51,9 @@ button {
 }
 .scrollbar-none {
   scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  overscroll-behavior: contain;
 }
 
 @keyframes fade-up {

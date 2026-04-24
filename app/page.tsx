@@ -611,6 +611,37 @@ export default function Home() {
           }}
         />
       )}
+
+      {/* 항상 떠있는 메모 등록 FAB (하단바 위) */}
+      {mode.kind === "closed" && !timelineOpen && !paywall && !signInOpen && (
+        <div
+          className="pointer-events-none fixed inset-x-0 z-20 mx-auto flex max-w-[430px] justify-center px-4"
+          style={{
+            bottom: "calc(72px + env(safe-area-inset-bottom))",
+          }}
+        >
+          <button
+            onClick={() => setMode({ kind: "create" })}
+            className="pointer-events-auto flex items-center gap-2 rounded-full bg-gold px-6 py-3.5 text-[14.5px] font-bold text-white shadow-[0_8px_24px_-8px_rgba(255,111,15,0.6)] transition hover:bg-gold-soft active:scale-[0.97]"
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden
+            >
+              <path
+                d="M12 5v14M5 12h14"
+                stroke="currentColor"
+                strokeWidth="2.4"
+                strokeLinecap="round"
+              />
+            </svg>
+            메모 등록
+          </button>
+        </div>
+      )}
     </main>
   );
 }
