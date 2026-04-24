@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "membar · AI가 정리해주는 인맥 관리";
+export const alt = "membar · 막 쳐도 AI가 정리해주는 인맥 관리";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 

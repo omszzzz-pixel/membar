@@ -6,7 +6,7 @@ import { InstallProvider } from "@/lib/installContext";
 
 const SITE_URL = "https://membar.kr";
 const SITE_NAME = "membar";
-const DEFAULT_TITLE = "membar · AI가 정리해주는 인맥 관리";
+const DEFAULT_TITLE = "membar · 막 쳐도 AI가 정리해주는 인맥 관리";
 const DEFAULT_DESCRIPTION =
   "누구 만났는지, 누구한테 무슨 말 했는지 다 기억 못 하는 사람을 위한 AI 인맥 관리. 그냥 막 쳐도 AI가 알아서 이름·회사·관심사·가족·메모까지 구조화해주고, 다음 미팅 전에는 한 페이지 브리핑까지. 영업직·VC·파운더·컨설턴트를 위한 membar.";
 
