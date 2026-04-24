@@ -10,6 +10,7 @@ import TimelineSheet from "@/components/TimelineSheet";
 import DisambigSheet, { type Candidate } from "@/components/DisambigSheet";
 import PaywallSheet from "@/components/PaywallSheet";
 import InstallBanner from "@/components/InstallBanner";
+import InAppBrowserNotice from "@/components/InAppBrowserNotice";
 import InstallToast from "@/components/InstallToast";
 import SaveToast from "@/components/SaveToast";
 import { useUsage } from "@/lib/useUsage";
@@ -304,6 +305,7 @@ export default function Home() {
 
   return (
     <main className="relative min-h-dvh">
+      <InAppBrowserNotice />
       <InstallBanner />
       <header className="sticky top-0 z-10 border-b border-paper/8 bg-ink px-4 pb-3 pt-4">
         <div className="flex items-center justify-between">
