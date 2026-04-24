@@ -89,6 +89,28 @@ export default function SignInSheet({
         <div className="mt-3 text-center text-[12px] text-paper/50">
           로그인하면 이미 기록해둔 인맥이 자동으로 연결돼요.
         </div>
+
+        <div className="mt-4 text-center text-[11.5px] leading-relaxed text-paper/45">
+          로그인 시{" "}
+          <a
+            href="/terms"
+            target="_blank"
+            rel="noreferrer"
+            className="underline hover:text-paper/70"
+          >
+            이용약관
+          </a>
+          {" · "}
+          <a
+            href="/privacy"
+            target="_blank"
+            rel="noreferrer"
+            className="underline hover:text-paper/70"
+          >
+            개인정보 처리방침
+          </a>
+          에 동의합니다.
+        </div>
       </div>
     </div>
   );

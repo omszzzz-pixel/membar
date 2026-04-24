@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import Avatar from "@/components/Avatar";
 import ThemeToggle from "@/components/ThemeToggle";
 import SignInSheet from "@/components/SignInSheet";
@@ -224,6 +225,19 @@ export default function MePage() {
           </div>
         </Section>
 
+        {/* 약관 · 정책 링크 */}
+        <Section title="약관 · 정책">
+          <div className="overflow-hidden rounded-xl border border-paper/10 bg-surface">
+            <LegalLink href="/terms">이용약관</LegalLink>
+            <Divider />
+            <LegalLink href="/privacy">개인정보 처리방침</LegalLink>
+            <Divider />
+            <LegalLink href="/refund">환불 정책</LegalLink>
+            <Divider />
+            <LegalLink href="/business">사업자 정보</LegalLink>
+          </div>
+        </Section>
+
         <div className="mt-8 text-center text-[11.5px] text-paper/35">
           membar · v0.1
         </div>
@@ -280,4 +294,36 @@ function Row({
 
 function Divider() {
   return <div className="mx-4 h-px bg-paper/8" />;
+}
+
+function LegalLink({
+  href,
+  children,
+}: {
+  href: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <Link
+      href={href}
+      className="flex w-full items-center justify-between px-4 py-3.5 text-left transition hover:bg-paper/4"
+    >
+      <span className="text-[14px] font-medium text-paper">{children}</span>
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        className="text-paper/40"
+      >
+        <path
+          d="M9 6l6 6-6 6"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </Link>
+  );
 }
