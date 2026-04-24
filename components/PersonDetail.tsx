@@ -211,7 +211,60 @@ export default function PersonDetail({
 
         <div className="h-px bg-paper/8" />
 
-        <div className="overflow-y-auto px-5 pb-6 pt-3 scrollbar-none">
+        <div className="px-5 pt-3">
+          <button
+            onClick={() => setBriefingOpen(true)}
+            className="flex w-full items-center justify-between rounded-lg border border-gold/35 bg-gold/10 px-4 py-3 transition hover:bg-gold/14"
+          >
+            <div className="flex items-center gap-2.5">
+              <svg
+                width="17"
+                height="17"
+                viewBox="0 0 24 24"
+                fill="none"
+                className="text-gold"
+              >
+                <path
+                  d="M7 3h10l4 4v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"
+                  stroke="currentColor"
+                  strokeWidth="1.75"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M9 13h6M9 17h4M9 9h3"
+                  stroke="currentColor"
+                  strokeWidth="1.75"
+                  strokeLinecap="round"
+                />
+              </svg>
+              <div className="text-left">
+                <div className="text-[14px] font-semibold text-gold">
+                  만남 전 브리핑
+                </div>
+                <div className="text-[12px] text-paper/55">
+                  AI가 히스토리 읽고 한 페이지로
+                </div>
+              </div>
+            </div>
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              className="text-gold/70"
+            >
+              <path
+                d="M9 6l6 6-6 6"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+        </div>
+
+        <div className="overflow-y-auto px-5 pb-6 pt-1 scrollbar-none">
           {sample && (
             <div className="mt-3 rounded-lg border border-gold/25 bg-gold/8 px-3.5 py-2.5 text-[13px] leading-relaxed text-paper/80">
               <span className="font-semibold text-gold">예시</span> — 실제
@@ -345,42 +398,13 @@ export default function PersonDetail({
           </Section>
         </div>
 
-        <div className="flex gap-2 border-t border-paper/8 bg-surface px-4 py-3">
+        <div className="flex gap-2 border-t border-paper/8 bg-surface px-5 py-3">
           <button
-            onClick={() => setBriefingOpen(true)}
-            className="flex items-center justify-center gap-1.5 rounded-lg border border-gold/35 bg-gold/10 px-4 py-3 text-[14px] font-semibold text-gold transition hover:bg-gold/18"
+            onClick={sample ? onClose : onEdit}
+            className="flex-1 rounded-lg bg-gold py-3 text-[14.5px] font-semibold text-white transition hover:bg-gold-soft"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M7 3h10l4 4v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"
-                stroke="currentColor"
-                strokeWidth="1.75"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M9 13h6M9 17h4M9 9h3"
-                stroke="currentColor"
-                strokeWidth="1.75"
-                strokeLinecap="round"
-              />
-            </svg>
-            브리핑
+            {sample ? "닫고 직접 추가하기" : "막 치면 AI가 반영"}
           </button>
-          {sample ? (
-            <button
-              onClick={onClose}
-              className="flex-1 rounded-lg bg-gold py-3 text-[14.5px] font-semibold text-white transition hover:bg-gold-soft"
-            >
-              닫고 직접 추가하기
-            </button>
-          ) : (
-            <button
-              onClick={onEdit}
-              className="flex-1 rounded-lg bg-gold py-3 text-[14.5px] font-semibold text-white transition hover:bg-gold-soft"
-            >
-              막 치면 AI가 반영
-            </button>
-          )}
         </div>
       </div>
 
