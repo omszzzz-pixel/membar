@@ -167,6 +167,31 @@ export default function PersonDetail({
                 />
               </svg>
             </button>
+            {!sample && (
+              <button
+                onClick={() => {
+                  if (
+                    confirm(
+                      `${person.name}님을 삭제할까요? 기록도 함께 지워져요.`
+                    )
+                  ) {
+                    onDelete();
+                  }
+                }}
+                className="rounded-lg p-2 text-paper/55 transition hover:bg-terra/10 hover:text-terra"
+                aria-label="삭제"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"
+                    stroke="currentColor"
+                    strokeWidth="1.75"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+            )}
             <button
               onClick={onClose}
               className="rounded-lg p-2 text-paper/60 transition hover:bg-paper/8 hover:text-paper"
@@ -186,60 +211,7 @@ export default function PersonDetail({
 
         <div className="h-px bg-paper/8" />
 
-        <div className="px-5 pt-3">
-          <button
-            onClick={() => setBriefingOpen(true)}
-            className="flex w-full items-center justify-between rounded-lg border border-gold/35 bg-gold/10 px-4 py-3 transition hover:bg-gold/14"
-          >
-            <div className="flex items-center gap-2.5">
-              <svg
-                width="17"
-                height="17"
-                viewBox="0 0 24 24"
-                fill="none"
-                className="text-gold"
-              >
-                <path
-                  d="M7 3h10l4 4v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"
-                  stroke="currentColor"
-                  strokeWidth="1.75"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M9 13h6M9 17h4M9 9h3"
-                  stroke="currentColor"
-                  strokeWidth="1.75"
-                  strokeLinecap="round"
-                />
-              </svg>
-              <div className="text-left">
-                <div className="text-[14px] font-semibold text-gold">
-                  만남 전 브리핑
-                </div>
-                <div className="text-[12px] text-paper/55">
-                  AI가 히스토리 읽고 한 페이지로
-                </div>
-              </div>
-            </div>
-            <svg
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              fill="none"
-              className="text-gold/70"
-            >
-              <path
-                d="M9 6l6 6-6 6"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-        </div>
-
-        <div className="overflow-y-auto px-5 pb-6 pt-1 scrollbar-none">
+        <div className="overflow-y-auto px-5 pb-6 pt-3 scrollbar-none">
           {sample && (
             <div className="mt-3 rounded-lg border border-gold/25 bg-gold/8 px-3.5 py-2.5 text-[13px] leading-relaxed text-paper/80">
               <span className="font-semibold text-gold">예시</span> — 실제
@@ -373,7 +345,27 @@ export default function PersonDetail({
           </Section>
         </div>
 
-        <div className="flex gap-2 border-t border-paper/8 bg-surface px-5 py-3">
+        <div className="flex gap-2 border-t border-paper/8 bg-surface px-4 py-3">
+          <button
+            onClick={() => setBriefingOpen(true)}
+            className="flex items-center justify-center gap-1.5 rounded-lg border border-gold/35 bg-gold/10 px-4 py-3 text-[14px] font-semibold text-gold transition hover:bg-gold/18"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M7 3h10l4 4v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"
+                stroke="currentColor"
+                strokeWidth="1.75"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M9 13h6M9 17h4M9 9h3"
+                stroke="currentColor"
+                strokeWidth="1.75"
+                strokeLinecap="round"
+              />
+            </svg>
+            브리핑
+          </button>
           {sample ? (
             <button
               onClick={onClose}
@@ -382,20 +374,12 @@ export default function PersonDetail({
               닫고 직접 추가하기
             </button>
           ) : (
-            <>
-              <button
-                onClick={onDelete}
-                className="rounded-lg bg-paper/6 px-4 py-3 text-[14px] font-medium text-terra transition hover:bg-paper/10"
-              >
-                삭제
-              </button>
-              <button
-                onClick={onEdit}
-                className="flex-1 rounded-lg bg-gold py-3 text-[14.5px] font-semibold text-white transition hover:bg-gold-soft"
-              >
-                막 치면 AI가 반영
-              </button>
-            </>
+            <button
+              onClick={onEdit}
+              className="flex-1 rounded-lg bg-gold py-3 text-[14.5px] font-semibold text-white transition hover:bg-gold-soft"
+            >
+              막 치면 AI가 반영
+            </button>
           )}
         </div>
       </div>
