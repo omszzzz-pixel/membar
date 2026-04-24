@@ -209,9 +209,7 @@ export default function PersonDetail({
           </div>
         </div>
 
-        <div className="h-px bg-paper/8" />
-
-        <div className="px-5 pt-3">
+        <div className="px-5 pb-4">
           <button
             onClick={() => setBriefingOpen(true)}
             className="flex w-full items-center justify-between rounded-lg border border-gold/35 bg-gold/10 px-4 py-3 transition hover:bg-gold/14"
@@ -264,7 +262,9 @@ export default function PersonDetail({
           </button>
         </div>
 
-        <div className="overflow-y-auto px-5 pb-6 pt-1 scrollbar-none">
+        <div className="h-px bg-paper/8" />
+
+        <div className="overflow-y-auto px-5 pb-6 pt-3 scrollbar-none">
           {sample && (
             <div className="mt-3 rounded-lg border border-gold/25 bg-gold/8 px-3.5 py-2.5 text-[13px] leading-relaxed text-paper/80">
               <span className="font-semibold text-gold">예시</span> — 실제
