@@ -535,6 +535,7 @@ export default function Home() {
           onEdit={() => setMode({ kind: "edit", person: mode.person })}
           onDelete={() => handleDelete(mode.person.id)}
           onUpdate={handleUpdatePerson}
+          onCreateMemo={() => setMode({ kind: "create" })}
         />
       )}
 

@@ -17,6 +17,7 @@ type Props = {
   onEdit: () => void;
   onDelete: () => void;
   onUpdate: (updated: Person) => void;
+  onCreateMemo?: () => void;
 };
 
 export default function PersonDetail({
@@ -26,6 +27,7 @@ export default function PersonDetail({
   onEdit,
   onDelete,
   onUpdate,
+  onCreateMemo,
 }: Props) {
   useLockBodyScroll();
   const [history, setHistory] = useState<HistoryEntry[] | null>(null);
@@ -400,10 +402,10 @@ export default function PersonDetail({
 
         <div className="flex gap-2 border-t border-paper/8 bg-surface px-5 py-3">
           <button
-            onClick={sample ? onClose : onEdit}
+            onClick={sample ? (onCreateMemo ?? onClose) : onEdit}
             className="flex-1 rounded-lg bg-gold py-3 text-[14.5px] font-semibold text-white transition hover:bg-gold-soft"
           >
-            {sample ? "닫고 직접 추가하기" : "막 치면 AI가 반영"}
+            {sample ? "내 인맥 추가하기" : "막 치면 AI가 반영"}
           </button>
         </div>
       </div>
