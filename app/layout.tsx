@@ -79,6 +79,13 @@ export const metadata: Metadata = {
       "max-video-preview": -1,
     },
   },
+  verification: {
+    google: "jkd7beL9TBp3R-4hSgKr_-x4zT824bZhigWhKIDf6B0",
+    other: {
+      "naver-site-verification":
+        "0fe34054fd8e68e69dc94331dade9b775d9dd365",
+    },
+  },
   category: "productivity",
 };
 
