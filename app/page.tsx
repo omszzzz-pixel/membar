@@ -10,6 +10,7 @@ import TimelineSheet from "@/components/TimelineSheet";
 import DisambigSheet, { type Candidate } from "@/components/DisambigSheet";
 import PaywallSheet from "@/components/PaywallSheet";
 import SaveToast from "@/components/SaveToast";
+import InstallBanner from "@/components/InstallBanner";
 import { useUsage } from "@/lib/useUsage";
 import { apiFetch } from "@/lib/apiFetch";
 import {
@@ -286,6 +287,7 @@ export default function Home() {
 
   return (
     <main className="relative min-h-dvh">
+      <InstallBanner />
       <header className="sticky top-0 z-10 border-b border-paper/8 bg-ink px-4 pb-3 pt-4">
         <div className="flex items-center justify-between">
           <div className="flex items-baseline gap-2">

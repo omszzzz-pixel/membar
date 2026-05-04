@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import BottomNav from "@/components/BottomNav";
 import { UserProvider } from "@/lib/userContext";
+import { InstallProvider } from "@/lib/installContext";
 
 const SITE_URL = "https://membar.kr";
 const SITE_NAME = "membar";
@@ -145,10 +146,12 @@ export default function RootLayout({
       </head>
       <body>
         <UserProvider>
-          <div className="relative mx-auto min-h-dvh max-w-[430px]">
-            {children}
-          </div>
-          <BottomNav />
+          <InstallProvider>
+            <div className="relative mx-auto min-h-dvh max-w-[430px]">
+              {children}
+            </div>
+            <BottomNav />
+          </InstallProvider>
         </UserProvider>
       </body>
     </html>

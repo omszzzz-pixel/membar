@@ -7,6 +7,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import SignInSheet from "@/components/SignInSheet";
 import PaywallSheet from "@/components/PaywallSheet";
 import FeedbackBox from "@/components/FeedbackBox";
+import InstallButton from "@/components/InstallButton";
 import { apiFetch } from "@/lib/apiFetch";
 import { useUser } from "@/lib/userContext";
 import { useUsage } from "@/lib/useUsage";
@@ -203,6 +204,10 @@ export default function MePage() {
         {/* Settings */}
         <Section title="설정">
           <div className="overflow-hidden rounded-xl border border-paper/10 bg-surface">
+            <Row label="앱으로 설치">
+              <InstallButton />
+            </Row>
+            <Divider />
             <Row label="다크모드">
               <ThemeToggle />
             </Row>
