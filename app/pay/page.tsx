@@ -1,11 +1,27 @@
 "use client";
 
-import { Suspense, useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useUser } from "@/lib/userContext";
 import { apiFetch } from "@/lib/apiFetch";
 
-type FormData = Record<string, string>;
+type PaymentData = {
+  merchantId: string;
+  productName: string;
+  orderNumber: string;
+  amount: number;
+  payMethod: string;
+  returnUrl: string;
+  ediDate: string;
+  hashKey: string;
+  customerName?: string;
+  customerEmail?: string;
+  customerPhone?: string;
+  customerAddress?: string;
+  customerPost?: string;
+  reserved?: string;
+  language?: string;
+};
 
 export default function PayPage() {
   return (
@@ -27,13 +43,12 @@ function PayInner() {
   const plan = params.get("plan");
   const { authed, loading: userLoading } = useUser();
 
-  const [status, setStatus] = useState<"loading" | "ready" | "error">(
+  const [status, setStatus] = useState<"loading" | "ready" | "running" | "error">(
     "loading"
   );
   const [error, setError] = useState<string | null>(null);
-  const [initUrl, setInitUrl] = useState<string>("");
-  const [formData, setFormData] = useState<FormData | null>(null);
-  const formRef = useRef<HTMLFormElement>(null);
+  const [paymentData, setPaymentData] = useState<PaymentData | null>(null);
+  const [baseUrl, setBaseUrl] = useState<string>("");
 
   useEffect(() => {
     if (userLoading) return;
@@ -62,8 +77,8 @@ function PayInner() {
           setStatus("error");
           return;
         }
-        setInitUrl(data.initUrl);
-        setFormData(data.formData);
+        setBaseUrl(data.baseUrl);
+        setPaymentData(data.paymentData);
         setStatus("ready");
       } catch (e) {
         if (cancelled) return;
@@ -77,15 +92,51 @@ function PayInner() {
     };
   }, [userLoading, authed, plan, router]);
 
+  // 데이터 받으면 자동으로 SDK 결제창 호출
   useEffect(() => {
-    if (status === "ready" && formRef.current) {
-      formRef.current.submit();
-    }
-  }, [status]);
+    if (status !== "ready" || !paymentData || !baseUrl) return;
+
+    let mounted = true;
+    (async () => {
+      try {
+        const mod = await import("@korpay/sdk");
+        const KorpaySdk = mod.default;
+        if (!mounted) return;
+        setStatus("running");
+        // SDK type is more strict about payMethod literal — cast through unknown
+        const sdkData = paymentData as unknown as Parameters<
+          typeof KorpaySdk.payment
+        >[1];
+        KorpaySdk.payment(baseUrl, sdkData, {
+          onStart: () => {
+            // do nothing
+          },
+          onError: (err: string) => {
+            setError(err || "결제창 호출 오류");
+            setStatus("error");
+          },
+          onClose: () => {
+            // 결제창 닫혔을 때 — 인증 성공 여부는 returnUrl에서 처리됨
+            // 이 시점에 status를 ready로 되돌리지 않고 그대로 두면
+            // 사용자가 닫기를 눌러야 빠져나올 수 있음
+          },
+        });
+      } catch (e) {
+        setError(
+          e instanceof Error ? e.message : "결제 SDK 로드 실패"
+        );
+        setStatus("error");
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, [status, paymentData, baseUrl]);
 
   return (
-    <main className="flex min-h-dvh flex-col bg-ink">
-      <header className="flex items-center justify-between border-b border-paper/10 bg-surface px-4 py-3">
+    <main className="flex min-h-dvh flex-col items-center justify-center bg-ink px-6">
+      <header className="absolute left-0 right-0 top-0 flex items-center justify-between border-b border-paper/10 bg-surface px-4 py-3">
         <h1 className="text-[15px] font-bold text-paper">결제</h1>
         <button
           onClick={() => router.back()}
@@ -95,18 +146,31 @@ function PayInner() {
         </button>
       </header>
 
-      {status === "loading" && (
-        <div className="flex flex-1 items-center justify-center text-[13.5px] text-paper/55">
-          결제 준비 중…
+      {(status === "loading" || status === "running") && (
+        <div className="text-center">
+          <div className="text-[15px] font-semibold text-paper">
+            {status === "loading" ? "결제 준비 중…" : "결제창 여는 중…"}
+          </div>
+          <div className="mt-1 text-[12.5px] text-paper/55">
+            잠시만 기다려주세요
+          </div>
+        </div>
+      )}
+
+      {status === "ready" && (
+        <div className="text-center text-[14px] text-paper/65">
+          결제창 호출 중…
         </div>
       )}
 
       {status === "error" && (
-        <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center">
+        <div className="flex flex-col items-center gap-3 text-center">
           <div className="text-[16px] font-bold text-terra">
             결제를 시작할 수 없어요
           </div>
-          <div className="text-[13.5px] text-paper/65">{error}</div>
+          <div className="max-w-[320px] text-[13.5px] text-paper/65">
+            {error}
+          </div>
           <button
             onClick={() => router.replace("/me")}
             className="mt-3 rounded-lg bg-paper/8 px-4 py-2 text-[13px] font-semibold text-paper/80"
@@ -114,29 +178,6 @@ function PayInner() {
             돌아가기
           </button>
         </div>
-      )}
-
-      {status === "ready" && formData && (
-        <>
-          <form
-            ref={formRef}
-            method="POST"
-            action={initUrl}
-            target="korpay_iframe"
-            style={{ display: "none" }}
-          >
-            {Object.entries(formData).map(([k, v]) => (
-              <input key={k} type="hidden" name={k} value={v} />
-            ))}
-          </form>
-
-          <iframe
-            name="korpay_iframe"
-            id="korpay_iframe"
-            title="결제"
-            className="flex-1 w-full border-0 bg-white"
-          />
-        </>
       )}
     </main>
   );

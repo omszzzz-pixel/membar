@@ -1,11 +1,11 @@
 import crypto from "crypto";
 
-const MID = process.env.KORPAY_MID || "";
+const MERCHANT_ID = process.env.KORPAY_MID || "";
 const MKEY = process.env.KORPAY_MKEY || "";
-const INIT_URL =
-  process.env.KORPAY_INIT_URL ||
-  "https://pgapi.korpay.com/payInit_hash.korpay?uiType=iframe";
-const CANCEL_URL = "https://pgapi.korpay.com/api/cancel";
+const BASE_URL =
+  process.env.KORPAY_BASE_URL || "https://payments.korpay.com/v1";
+
+export const KORPAY_BASE_URL = BASE_URL;
 
 export const PLANS = {
   "1m": { amount: 4990, label: "1개월", days: 30 },
@@ -15,46 +15,26 @@ export const PLANS = {
 
 export type PlanId = keyof typeof PLANS;
 
-export function getMid(): string {
-  return MID;
+export function getMerchantId(): string {
+  return MERCHANT_ID;
 }
-export function getInitUrl(): string {
-  return INIT_URL;
-}
-export function getCancelUrl(): string {
-  return CANCEL_URL;
+
+export function getBaseUrl(): string {
+  return BASE_URL;
 }
 
 /**
- * SHA256 hex of (MID + ediDate + amt + MKEY).
- * 코페이 결제 요청 시 hashStr 필드.
+ * SHA-256(merchantId + ediDate + amount + mkey).
+ * 코페이 인증 결제 요청 시 hashKey 필드용.
  */
-export function calcRequestHash(ediDate: string, amt: number): string {
+export function calcHashKey(ediDate: string, amount: number): string {
   return crypto
     .createHash("sha256")
-    .update(MID + ediDate + String(amt) + MKEY)
+    .update(MERCHANT_ID + ediDate + String(amount) + MKEY)
     .digest("hex");
 }
 
-/**
- * 코페이가 returnUrl POST 시 보내주는 hash 검증.
- * SHA256(mid + ordNo + amount + appNo).
- * 위변조 방지용.
- */
-export function verifyReturnHash(
-  ordNo: string,
-  amount: number,
-  appNo: string,
-  hash: string
-): boolean {
-  const expected = crypto
-    .createHash("sha256")
-    .update(MID + ordNo + String(amount) + appNo)
-    .digest("hex");
-  return expected === hash;
-}
-
-/** YYYYMMDDHHmmss in KST. */
+/** YYYYMMDDHHmmss in KST. hashKey와 동일한 값을 ediDate로 보내야 함. */
 export function ediDate(): string {
   const now = new Date();
   const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
@@ -67,9 +47,44 @@ export function ediDate(): string {
   return `${y}${m}${d}${h}${mi}${s}`;
 }
 
-/** 30자 이하의 유니크 주문번호. */
-export function generateOrderNo(): string {
-  const ts = Date.now().toString(36).toUpperCase(); // ~9 chars
-  const rand = Math.random().toString(36).slice(2, 10).toUpperCase(); // 8 chars
-  return `MB${ts}${rand}`;
+/** 영문·숫자만, 40자 이하의 unique orderNumber. */
+export function generateOrderNumber(): string {
+  const ts = Date.now().toString(36).toUpperCase();
+  const rand = Math.random().toString(36).slice(2, 10).toUpperCase();
+  return `MB${ts}${rand}`.replace(/[^A-Z0-9]/g, "");
+}
+
+/**
+ * 인증 성공 후 paymentKey로 결제 승인 요청.
+ * Endpoint: POST {BASE_URL}/payments/confirm?paymentKey=xxx
+ */
+export async function confirmPayment(
+  paymentKey: string
+): Promise<{
+  ok: boolean;
+  status: number;
+  data: Record<string, unknown>;
+}> {
+  const query = new URLSearchParams({ paymentKey }).toString();
+  try {
+    const res = await fetch(`${BASE_URL}/payments/confirm?${query}`, {
+      method: "POST",
+    });
+    const text = await res.text();
+    let data: Record<string, unknown> = {};
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = { raw: text };
+    }
+    return { ok: res.ok, status: res.status, data };
+  } catch (err) {
+    return {
+      ok: false,
+      status: 0,
+      data: {
+        error: err instanceof Error ? err.message : String(err),
+      },
+    };
+  }
 }

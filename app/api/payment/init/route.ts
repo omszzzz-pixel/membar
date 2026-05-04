@@ -2,11 +2,11 @@ import { NextResponse } from "next/server";
 import { getServerSupabase } from "@/lib/supabase";
 import { resolveUserId } from "@/lib/authGuard";
 import {
-  calcRequestHash,
+  calcHashKey,
   ediDate,
-  generateOrderNo,
-  getInitUrl,
-  getMid,
+  generateOrderNumber,
+  getBaseUrl,
+  getMerchantId,
   PLANS,
   type PlanId,
 } from "@/lib/korpay";
@@ -29,7 +29,6 @@ export async function POST(req: Request) {
 
     const sb = getServerSupabase();
 
-    // Look up user metadata for buyer info
     const { data: userResult } = await sb.auth.admin.getUserById(userId);
     const meta = (userResult?.user?.user_metadata ?? {}) as Record<
       string,
@@ -43,17 +42,16 @@ export async function POST(req: Request) {
       "membar 사용자";
     const buyerEmail = userResult?.user?.email ?? "";
 
-    const orderNo = generateOrderNo();
+    const orderNumber = generateOrderNumber();
     const ed = ediDate();
-    const amt = planInfo.amount;
-    const hashStr = calcRequestHash(ed, amt);
+    const amount = planInfo.amount;
+    const hashKey = calcHashKey(ed, amount);
 
-    // Pre-record payment (status=init)
     const { error: insertErr } = await sb.from("payments").insert({
       user_id: userId,
-      order_no: orderNo,
-      mid: getMid(),
-      amount: amt,
+      order_no: orderNumber,
+      mid: getMerchantId(),
+      amount,
       plan,
       status: "init",
     });
@@ -68,20 +66,20 @@ export async function POST(req: Request) {
     const returnUrl = `${origin}/api/payment/return`;
 
     return NextResponse.json({
-      initUrl: getInitUrl(),
-      formData: {
-        payMethod: "CARD",
-        id: getMid(),
-        goodsName: `membar Pro ${planInfo.label}`,
-        orderNo,
-        ediDate: ed,
-        amt: String(amt),
+      baseUrl: getBaseUrl(),
+      paymentData: {
+        merchantId: getMerchantId(),
+        productName: `membar Pro ${planInfo.label}`,
+        orderNumber,
+        amount,
+        payMethod: "card",
         returnUrl,
-        hashStr,
-        ordNm: buyerName,
-        buyerName,
-        buyerEmail,
-        reqReserved: userId, // for cross-check on return
+        ediDate: ed,
+        hashKey,
+        customerName: buyerName,
+        customerEmail: buyerEmail,
+        reserved: userId,
+        language: "ko",
       },
     });
   } catch (err) {
@@ -92,9 +90,9 @@ export async function POST(req: Request) {
 
 function getOrigin(req: Request): string {
   const url = new URL(req.url);
-  // Use forwarded host if present (Vercel sets this)
   const forwardedHost = req.headers.get("x-forwarded-host");
-  const proto = req.headers.get("x-forwarded-proto") ?? url.protocol.replace(":", "");
+  const proto =
+    req.headers.get("x-forwarded-proto") ?? url.protocol.replace(":", "");
   if (forwardedHost) return `${proto}://${forwardedHost}`;
   return `${url.protocol}//${url.host}`;
 }

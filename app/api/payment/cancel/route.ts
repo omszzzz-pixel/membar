@@ -1,12 +1,18 @@
 import { NextResponse } from "next/server";
 import { getServerSupabase } from "@/lib/supabase";
 import { getAdminFromRequest } from "@/lib/isAdmin";
-import { getCancelUrl, getMid } from "@/lib/korpay";
+import { getBaseUrl, getMerchantId } from "@/lib/korpay";
 import { revokePro } from "@/lib/pro";
 import { notifyAsync, fmtText } from "@/lib/telegram";
 
 export const runtime = "nodejs";
 
+/**
+ * 관리자 환불 처리.
+ * TODO: 코페이 cancel API endpoint 정확한 URL을 받아서 연결.
+ *       현 시점에서는 placeholder — 실제 호출 전 코페이에 확인 필요.
+ *       추정 URL: {BASE_URL}/payments/cancel?paymentKey=xxx (또는 별도)
+ */
 export async function POST(req: Request) {
   const admin = await getAdminFromRequest(req);
   if (!admin) {
@@ -37,17 +43,21 @@ export async function POST(req: Request) {
       { status: 400 }
     );
   }
+  if (!payment.tid) {
+    return NextResponse.json({ error: "tid missing" }, { status: 400 });
+  }
 
-  // Call KorPay cancel API
-  const res = await fetch(getCancelUrl(), {
+  // TODO: 코페이 정식 cancel endpoint URL 확정 필요
+  const cancelUrl = `${getBaseUrl()}/payments/cancel`;
+  const res = await fetch(cancelUrl, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      mid: getMid(),
-      ordNo: orderNo,
-      canAmt: String(payment.amount),
-      canNm: admin.email,
-      canMsg: reason ?? "관리자 환불",
+      merchantId: getMerchantId(),
+      orderNumber: orderNo,
+      tid: payment.tid,
+      cancelAmount: payment.amount,
+      cancelReason: reason ?? "관리자 환불",
     }),
   });
 
@@ -58,9 +68,10 @@ export async function POST(req: Request) {
     result = { raw: await res.text() };
   }
 
-  if (result.res_code !== "0000") {
+  // resultCode 2001 = 취소 성공
+  if (result.resultCode !== "2001") {
     return NextResponse.json(
-      { error: result.res_msg ?? "cancel failed", result },
+      { error: result.message ?? "cancel failed", result },
       { status: 502 }
     );
   }
