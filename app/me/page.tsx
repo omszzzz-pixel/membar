@@ -118,29 +118,47 @@ export default function MePage() {
         {/* Memo usage bar */}
         <Section title="이번 달 메모">
           <div className="rounded-xl border border-paper/10 bg-surface px-4 py-3.5">
-            <div className="flex items-baseline justify-between">
-              <span className="text-[13.5px] font-medium text-paper/65">
-                {usage.memos} / {MONTHLY_MEMO_LIMIT}개 사용
-              </span>
-              <span className="text-[12.5px] font-semibold tabular-nums text-paper/50">
-                {memoPct}%
-              </span>
-            </div>
-            <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-paper/8">
-              <div
-                className={`h-full rounded-full transition-all ${memoBarColor}`}
-                style={{ width: `${memoPct}%` }}
-              />
-            </div>
-            {usage.memos >= MONTHLY_MEMO_LIMIT ? (
-              <div className="mt-2 text-[12px] font-medium text-terra">
-                이번 달 메모 한도 도달. 다음 달 1일에 초기화돼요.
-              </div>
-            ) : usage.memos >= MEMO_WARN_AT ? (
-              <div className="mt-2 text-[12px] font-medium text-paper/60">
-                이번 달 {MONTHLY_MEMO_LIMIT - usage.memos}개 남았어요
-              </div>
-            ) : null}
+            {usage.pro ? (
+              <>
+                <div className="flex items-baseline justify-between">
+                  <span className="text-[13.5px] font-medium text-paper/65">
+                    {usage.memos}개 사용 · 무제한
+                  </span>
+                  <span className="rounded-md bg-gold/15 px-1.5 py-0.5 text-[10.5px] font-bold text-gold">
+                    PRO
+                  </span>
+                </div>
+                <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-paper/8">
+                  <div className="h-full w-full rounded-full bg-gold/40" />
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex items-baseline justify-between">
+                  <span className="text-[13.5px] font-medium text-paper/65">
+                    {usage.memos} / {MONTHLY_MEMO_LIMIT}개 사용
+                  </span>
+                  <span className="text-[12.5px] font-semibold tabular-nums text-paper/50">
+                    {memoPct}%
+                  </span>
+                </div>
+                <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-paper/8">
+                  <div
+                    className={`h-full rounded-full transition-all ${memoBarColor}`}
+                    style={{ width: `${memoPct}%` }}
+                  />
+                </div>
+                {usage.memos >= MONTHLY_MEMO_LIMIT ? (
+                  <div className="mt-2 text-[12px] font-medium text-terra">
+                    이번 달 메모 한도 도달. 다음 달 1일에 초기화돼요.
+                  </div>
+                ) : usage.memos >= MEMO_WARN_AT ? (
+                  <div className="mt-2 text-[12px] font-medium text-paper/60">
+                    이번 달 {MONTHLY_MEMO_LIMIT - usage.memos}개 남았어요
+                  </div>
+                ) : null}
+              </>
+            )}
           </div>
         </Section>
 

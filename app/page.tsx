@@ -132,14 +132,16 @@ export default function Home() {
 
   const count = persons?.length ?? 0;
   const memosUsed = usage.memos;
+  const isPro = usage.pro;
+  // Pro 유저는 모든 한도/넛지를 우회
   const softNudge =
-    count >= GUEST_SOFT_NUDGE && count < GUEST_MEDIUM_NUDGE;
+    !isPro && count >= GUEST_SOFT_NUDGE && count < GUEST_MEDIUM_NUDGE;
   const mediumNudge =
-    count >= GUEST_MEDIUM_NUDGE && count < GUEST_HARD_LIMIT;
+    !isPro && count >= GUEST_MEDIUM_NUDGE && count < GUEST_HARD_LIMIT;
   const memoNudge =
-    memosUsed >= MEMO_WARN_AT && memosUsed < MONTHLY_MEMO_LIMIT;
-  const atPersonLimit = count >= GUEST_HARD_LIMIT;
-  const atMemoLimit = memosUsed >= MONTHLY_MEMO_LIMIT;
+    !isPro && memosUsed >= MEMO_WARN_AT && memosUsed < MONTHLY_MEMO_LIMIT;
+  const atPersonLimit = !isPro && count >= GUEST_HARD_LIMIT;
+  const atMemoLimit = !isPro && memosUsed >= MONTHLY_MEMO_LIMIT;
 
   const handleOpenCreate = () => {
     if (atMemoLimit) {
@@ -484,8 +486,8 @@ export default function Home() {
           placeholder="누구 이름이랑 떠오르는 거 막 쳐요"
           examples={CREATE_EXAMPLES}
           memosUsed={memosUsed}
-          memoLimit={MONTHLY_MEMO_LIMIT}
-          memoWarnAt={MEMO_WARN_AT}
+          memoLimit={isPro ? undefined : MONTHLY_MEMO_LIMIT}
+          memoWarnAt={isPro ? undefined : MEMO_WARN_AT}
           error={submitError}
           onClose={() => {
             setSubmitError(null);
@@ -512,8 +514,8 @@ export default function Home() {
           placeholder="바뀐 거 있으면 그냥 치세요"
           examples={EDIT_EXAMPLES}
           memosUsed={memosUsed}
-          memoLimit={MONTHLY_MEMO_LIMIT}
-          memoWarnAt={MEMO_WARN_AT}
+          memoLimit={isPro ? undefined : MONTHLY_MEMO_LIMIT}
+          memoWarnAt={isPro ? undefined : MEMO_WARN_AT}
           error={submitError}
           onClose={() => {
             setSubmitError(null);
