@@ -3,7 +3,8 @@ import crypto from "crypto";
 const MID = process.env.KORPAY_MID || "";
 const MKEY = process.env.KORPAY_MKEY || "";
 const INIT_URL =
-  process.env.KORPAY_INIT_URL || "https://pgapi.korpay.com/payInit_hash.korpay";
+  process.env.KORPAY_INIT_URL ||
+  "https://pgapi.korpay.com/payInit_hash.korpay?uiType=iframe";
 const CANCEL_URL = "https://pgapi.korpay.com/api/cancel";
 
 export const PLANS = {
