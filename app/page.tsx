@@ -110,18 +110,8 @@ export default function Home() {
     if (userId) void refresh();
   }, [userId, refresh]);
 
-  // 등록된 인맥이 0명이면 진입 즉시 메모 등록 모달 오픈.
-  // 같은 세션에서 한 번 닫으면 다시는 안 뜨지만, 새 세션에선 다시 유도.
-  useEffect(() => {
-    if (!persons) return; // 로딩 중
-    if (persons.length > 0) return; // 이미 인맥 있음
-    try {
-      if (sessionStorage.getItem("membar_welcome_dismissed")) return;
-    } catch {
-      // sessionStorage 접근 실패 시 그냥 오픈
-    }
-    setMode((prev) => (prev.kind === "closed" ? { kind: "create" } : prev));
-  }, [persons]);
+  // (자동 모달 오픈 제거 — 광고 유입 유저가 컨텍스트 없이 입력창 보고 바로
+  //  이탈하는 문제로 EmptyHint(샘플+CTA) 우선 노출 방식으로 전환)
 
   const filteredSorted = useMemo(() => {
     if (!persons) return [];
@@ -529,11 +519,6 @@ export default function Home() {
           onClose={() => {
             setSubmitError(null);
             setMode({ kind: "closed" });
-            try {
-              sessionStorage.setItem("membar_welcome_dismissed", "1");
-            } catch {
-              // 무시
-            }
           }}
           onSubmit={(text) => handleSubmit(text)}
           submitting={submitting}
@@ -684,40 +669,76 @@ function EmptyHint({
 }) {
   return (
     <div className="anim-fade-up">
-      <div className="pt-4">
-        <div className="text-[18px] font-bold text-paper">
-          이름이랑 떠오르는 걸 그냥 쓰세요
+      {/* 히어로 — 가치 프롭 명확히 */}
+      <div className="pt-3">
+        <div className="text-[24px] font-black leading-tight text-paper">
+          AI가 정리해주는<br />
+          <span className="text-gold">인맥 관리</span>
         </div>
-        <div className="mt-1 text-[14px] text-paper/60">
-          AI가 알아서 분류·정리해 드려요.
+        <div className="mt-2.5 text-[14px] leading-relaxed text-paper/65">
+          누구랑 무슨 얘기 했는지 막 적어두세요.<br />
+          AI가 사람·관심사·해야 할 일까지 자동 정리해줘요.
         </div>
       </div>
 
-      <div className="mt-5">
-        <div className="mb-2 flex items-baseline justify-between">
-          <span className="text-[13px] font-semibold text-paper/60">
-            예시
-          </span>
-          <span className="text-[12.5px] text-paper/45">
-            탭해서 둘러보기
-          </span>
-        </div>
-        <ul className="space-y-2">
-          {SAMPLE_PERSONS.map((p) => (
-            <li key={p.id}>
-              <PersonCard person={p} onClick={() => onSampleClick(p)} />
-            </li>
-          ))}
-        </ul>
+      {/* 핵심 기능 3개 (시각적 신뢰) */}
+      <div className="mt-5 grid grid-cols-3 gap-2">
+        <FeaturePill icon="✏️" text="막 입력" />
+        <FeaturePill icon="🪄" text="AI 정리" />
+        <FeaturePill icon="📋" text="만남 전 브리핑" />
       </div>
+
+      {/* 샘플 — 광고에서 본 그 화면을 즉시 체험 */}
+      <div className="mt-6 rounded-xl border border-gold/30 bg-gold/8 px-4 py-3">
+        <div className="flex items-baseline justify-between">
+          <div>
+            <div className="text-[13.5px] font-bold text-gold">
+              👇 예시 인물 탭해보기
+            </div>
+            <div className="mt-0.5 text-[12px] text-paper/60">
+              실제 입력 → AI 정리 결과를 미리 볼 수 있어요
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <ul className="mt-3 space-y-2">
+        {SAMPLE_PERSONS.map((p) => (
+          <li key={p.id}>
+            <PersonCard person={p} onClick={() => onSampleClick(p)} />
+          </li>
+        ))}
+      </ul>
 
       <div className="mt-6">
         <button
           onClick={onOpen}
-          className="w-full rounded-lg bg-gold py-3.5 text-[14.5px] font-semibold text-white transition hover:bg-gold-soft"
+          className="flex w-full items-center justify-center gap-2 rounded-lg bg-gold py-3.5 text-[14.5px] font-semibold text-white transition hover:bg-gold-soft"
         >
-          + 첫 메모 등록하기
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <path
+              d="M12 5v14M5 12h14"
+              stroke="currentColor"
+              strokeWidth="2.4"
+              strokeLinecap="round"
+            />
+          </svg>
+          내 인맥 등록 시작
         </button>
+        <div className="mt-2 text-center text-[11.5px] text-paper/45">
+          5명까지 무료 · 회원가입 없이 바로 사용
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FeaturePill({ icon, text }: { icon: string; text: string }) {
+  return (
+    <div className="flex flex-col items-center gap-1 rounded-xl border border-paper/10 bg-surface px-2 py-3">
+      <div className="text-[20px]">{icon}</div>
+      <div className="text-center text-[11.5px] font-semibold text-paper/75 leading-tight">
+        {text}
       </div>
     </div>
   );
