@@ -725,9 +725,6 @@ function EmptyHint({
           </svg>
           내 인맥 등록 시작
         </button>
-        <div className="mt-2 text-center text-[11.5px] text-paper/45">
-          5명까지 무료 · 회원가입 없이 바로 사용
-        </div>
       </div>
     </div>
   );
