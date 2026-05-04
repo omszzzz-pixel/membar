@@ -51,6 +51,16 @@ export default function InputModal({
     return () => clearTimeout(t);
   }, []);
 
+  // 메모창 열림 알림 (1회 — 마운트 시점)
+  useEffect(() => {
+    void fetch("/api/notify", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ event: "memo_open", detail: title }),
+    }).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();

@@ -32,6 +32,14 @@ export default function SignInSheet({
 
   const handleKakao = async () => {
     setLoading(true);
+    void fetch("/api/notify", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        event: "login_click",
+        detail: title === "로그인" ? "메인 로그인" : title,
+      }),
+    }).catch(() => {});
     try {
       await signInWithKakao();
     } catch {

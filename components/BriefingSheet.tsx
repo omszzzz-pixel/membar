@@ -90,6 +90,19 @@ export default function BriefingSheet({ person, history, onClose }: Props) {
     void generate();
   }, [generate]);
 
+  // 브리핑 열림 알림 (1회)
+  useEffect(() => {
+    void fetch("/api/notify", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        event: "briefing_open",
+        detail: `${person.name} 브리핑${isSample(person.id) ? " (샘플)" : ""}`,
+      }),
+    }).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div className="anim-fade-in fixed inset-0 z-[60] bg-ink">
       <div className="anim-sheet-up mx-auto flex h-dvh w-full max-w-[430px] flex-col overflow-hidden bg-surface">
