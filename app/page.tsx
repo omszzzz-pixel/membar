@@ -70,6 +70,41 @@ export default function Home() {
     setPersons(data.persons);
   }, [userId]);
 
+  // 캐시된 persons 즉시 표시 (깜빡임 제거)
+  useEffect(() => {
+    if (!userId) return;
+    try {
+      const raw = localStorage.getItem(`membar_persons_cache_${userId}`);
+      if (raw) {
+        const parsed = JSON.parse(raw) as {
+          persons: Person[];
+          ts: number;
+        };
+        if (
+          parsed.persons &&
+          Date.now() - parsed.ts < 7 * 24 * 60 * 60 * 1000
+        ) {
+          setPersons(parsed.persons);
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }, [userId]);
+
+  // persons가 바뀔 때마다 캐시 자동 갱신 (refresh, optimistic update 모두 커버)
+  useEffect(() => {
+    if (!userId || !persons) return;
+    try {
+      localStorage.setItem(
+        `membar_persons_cache_${userId}`,
+        JSON.stringify({ persons, ts: Date.now() })
+      );
+    } catch {
+      // ignore
+    }
+  }, [userId, persons]);
+
   useEffect(() => {
     if (userId) void refresh();
   }, [userId, refresh]);
