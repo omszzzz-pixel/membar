@@ -148,11 +148,27 @@ export default function PrivacyPage() {
             "서비스 운영 모니터링 알림 발송",
             "영국 · 아랍에미리트",
           ],
+          [
+            "Meta Platforms, Inc.",
+            "광고 효과 측정 · 마케팅 분석 (Meta Pixel)",
+            "미국 · 아일랜드",
+          ],
         ]}
       />
       <P>
         ※ Anthropic은 이용자 입력을 모델 학습 목적으로 사용하지 않습니다
         (Anthropic 상업 이용 약관에 따름).
+        <br />※ Meta Pixel은 페이지 방문, 가입, 결제 등 이벤트를 전송하며
+        이용자는 브라우저 설정 또는{" "}
+        <a
+          href="https://www.facebook.com/help/568137493302217"
+          target="_blank"
+          rel="noreferrer"
+          className="underline"
+        >
+          Meta 광고 환경설정
+        </a>
+        에서 거부할 수 있습니다.
       </P>
 
       <H2>7. 개인정보 국외 이전</H2>

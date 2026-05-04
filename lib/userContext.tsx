@@ -10,6 +10,7 @@ import {
 } from "react";
 import { getBrowserSupabase } from "./supabase";
 import { getUserId as getLocalUserId } from "./userId";
+import { trackPixel } from "./pixel";
 
 export type UserState = {
   loading: boolean;
@@ -133,6 +134,11 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
                     null,
                 }),
               }).catch(() => {});
+              // Meta Pixel — 신규 가입 전환 이벤트
+              trackPixel("CompleteRegistration", {
+                content_name: "kakao_signup",
+                status: "completed",
+              });
             }
           }
         } catch {

@@ -147,7 +147,20 @@ export async function POST(req: Request) {
     }\n<code>${orderNumber}</code>`
   );
 
-  return redirect(origin, "success", "");
+  // Meta Pixel Purchase 이벤트용 파라미터를 success 페이지로 전달
+  return redirectSuccess(origin, {
+    order: orderNumber,
+    amount: String(payment.amount),
+    plan: payment.plan,
+  });
+}
+
+function redirectSuccess(
+  origin: string,
+  params: Record<string, string>
+): NextResponse {
+  const qs = new URLSearchParams(params).toString();
+  return NextResponse.redirect(`${origin}/pay/success?${qs}`, 303);
 }
 
 function redirect(origin: string, kind: "success" | "fail", msg: string) {
