@@ -4,8 +4,15 @@ import { useCallback, useEffect, useState } from "react";
 import type { Usage } from "./types";
 import { apiFetch } from "./apiFetch";
 
+type UsageWithPro = Usage & { pro: boolean; proUntil: string | null };
+
 export function useUsage(userId: string) {
-  const [usage, setUsage] = useState<Usage>({ persons: 0, memos: 0 });
+  const [usage, setUsage] = useState<UsageWithPro>({
+    persons: 0,
+    memos: 0,
+    pro: false,
+    proUntil: null,
+  });
   const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(async () => {
@@ -16,10 +23,12 @@ export function useUsage(userId: string) {
         { cache: "no-store" }
       );
       if (res.ok) {
-        const data = (await res.json()) as Usage;
+        const data = (await res.json()) as UsageWithPro;
         setUsage({
           persons: data.persons ?? 0,
           memos: data.memos ?? 0,
+          pro: data.pro ?? false,
+          proUntil: data.proUntil ?? null,
         });
       }
     } finally {

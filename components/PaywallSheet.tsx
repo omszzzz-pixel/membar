@@ -101,7 +101,8 @@ export default function PaywallSheet({ reason, onClose }: Props) {
         detail: plan ? `${plan.label} · ${formatWon(plan.price)}` : null,
       }),
     }).catch(() => {});
-    alert("결제는 추후 연결 예정이에요");
+    // Redirect to payment page with selected plan
+    window.location.href = `/pay?plan=${encodeURIComponent(selected)}`;
   };
 
   return (

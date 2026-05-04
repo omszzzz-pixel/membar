@@ -4,6 +4,18 @@ import { resolveUserId } from "@/lib/authGuard";
 
 export const runtime = "nodejs";
 
+async function getProUntil(
+  sb: ReturnType<typeof getServerSupabase>,
+  userId: string
+): Promise<string | null> {
+  const { data } = await sb
+    .from("profiles")
+    .select("pro_until")
+    .eq("user_id", userId)
+    .maybeSingle();
+  return data?.pro_until ?? null;
+}
+
 function startOfMonthUtc(): string {
   const d = new Date();
   d.setUTCDate(1);
@@ -47,8 +59,14 @@ export async function GET(req: Request) {
     );
   }
 
+  const proUntil = resolved.authed ? await getProUntil(sb, userId) : null;
+  const isPro =
+    proUntil !== null && new Date(proUntil) > new Date();
+
   return NextResponse.json({
     persons: personsRes.count ?? 0,
     memos: memosRes.count ?? 0,
+    pro: isPro,
+    proUntil,
   });
 }

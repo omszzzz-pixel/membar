@@ -144,7 +144,31 @@ export default function MePage() {
         </Section>
 
         {/* Upgrade */}
-        <Section title="Pro 업그레이드">
+        <Section title={usage.pro ? "Pro 구독 중" : "Pro 업그레이드"}>
+          {usage.pro ? (
+            <div className="rounded-xl border border-gold/30 bg-gold/8 px-4 py-3.5">
+              <div className="flex items-center gap-2">
+                <span className="rounded-md bg-gold px-2 py-0.5 text-[11px] font-bold text-white">
+                  PRO
+                </span>
+                <span className="text-[14px] font-bold text-paper">
+                  무제한 사용 중
+                </span>
+              </div>
+              <div className="mt-1.5 text-[12.5px] text-paper/65">
+                만료일{" "}
+                <span className="font-semibold text-paper/85">
+                  {usage.proUntil
+                    ? new Date(usage.proUntil).toLocaleDateString("ko-KR", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })
+                    : "-"}
+                </span>
+              </div>
+            </div>
+          ) : (
           <button
             onClick={() => setPaywallOpen(true)}
             className="flex w-full items-center justify-between rounded-xl border border-gold/30 bg-gold/8 px-4 py-3.5 text-left transition hover:bg-gold/14"
@@ -173,6 +197,7 @@ export default function MePage() {
               />
             </svg>
           </button>
+          )}
         </Section>
 
         {/* Settings */}

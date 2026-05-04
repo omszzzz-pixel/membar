@@ -4,6 +4,7 @@ import { getServerSupabase } from "@/lib/supabase";
 import { parseMemo } from "@/lib/parseMemo";
 import { notifyAsync, fmtText } from "@/lib/telegram";
 import { resolveUserId } from "@/lib/authGuard";
+import { isPro } from "@/lib/pro";
 import {
   FREE_LIMIT,
   MONTHLY_MEMO_LIMIT,
@@ -218,10 +219,15 @@ export async function POST(req: Request) {
 
     const sb = getServerSupabase();
 
+    // Pro users have no memo/person limits
+    const pro = await isPro(userId);
+
     // Enforce monthly memo limit before we spend tokens parsing
-    const memoCount = await memosThisMonth(sb, userId);
-    if (memoCount >= MONTHLY_MEMO_LIMIT) {
-      return NextResponse.json({ error: "memo_limit" }, { status: 402 });
+    if (!pro) {
+      const memoCount = await memosThisMonth(sb, userId);
+      if (memoCount >= MONTHLY_MEMO_LIMIT) {
+        return NextResponse.json({ error: "memo_limit" }, { status: 402 });
+      }
     }
 
     const parsed = await parseMemo(input, null);
@@ -278,7 +284,7 @@ export async function POST(req: Request) {
         .from("persons")
         .select("id", { count: "exact", head: true })
         .eq("user_id", userId);
-      if ((count ?? 0) >= FREE_LIMIT) {
+      if (!pro && (count ?? 0) >= FREE_LIMIT) {
         return NextResponse.json({ error: "limit" }, { status: 402 });
       }
     }
@@ -405,10 +411,13 @@ export async function PATCH(req: Request) {
     if (!input)
       return NextResponse.json({ error: "input required" }, { status: 400 });
 
-    // Enforce monthly memo limit (PATCH with input writes to history)
-    const memoCount = await memosThisMonth(sb, userId);
-    if (memoCount >= MONTHLY_MEMO_LIMIT) {
-      return NextResponse.json({ error: "memo_limit" }, { status: 402 });
+    // Enforce monthly memo limit (PATCH with input writes to history) — Pro = unlimited
+    const proPatch = await isPro(userId);
+    if (!proPatch) {
+      const memoCount = await memosThisMonth(sb, userId);
+      if (memoCount >= MONTHLY_MEMO_LIMIT) {
+        return NextResponse.json({ error: "memo_limit" }, { status: 402 });
+      }
     }
 
     const { data: existing, error: exErr } = await sb
